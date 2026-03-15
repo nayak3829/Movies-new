@@ -3,7 +3,17 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Bell, Menu, X, ChevronDown, User, Settings, HelpCircle, LogOut } from 'lucide-react';
+import {
+  Search,
+  Bell,
+  Menu,
+  X,
+  ChevronDown,
+  User,
+  Settings,
+  HelpCircle,
+  LogOut,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SearchModal } from './search-modal';
 
