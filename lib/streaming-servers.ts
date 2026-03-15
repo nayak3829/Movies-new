@@ -8,39 +8,16 @@ export interface StreamingServer {
   priority?: number;
 }
 
-// Default streaming servers from your HTML file - sorted by reliability
+// Default streaming servers - sorted by reliability and ad-free experience
+// Servers with less/no ads are prioritized first
 export const DEFAULT_SERVERS: StreamingServer[] = [
   {
-    id: 'all-servers',
-    name: 'All Servers (IMDB)',
-    url: 'https://smrta384und.com/play/',
-    movieTemplate: 'https://smrta384und.com/play/{imdb}',
-    tvTemplate: 'https://smrta384und.com/play/{imdb}',
+    id: 'embed-su',
+    name: 'embed.su (Best)',
+    url: 'embed.su',
+    movieTemplate: 'https://embed.su/embed/movie/{id}',
+    tvTemplate: 'https://embed.su/embed/tv/{id}/{season}/{episode}',
     priority: 0
-  },
-  {
-    id: 'vidsrc-to',
-    name: 'vidsrc.to',
-    url: 'vidsrc.to',
-    movieTemplate: 'https://vidsrc.to/embed/movie/{id}',
-    tvTemplate: 'https://vidsrc.to/embed/tv/{id}/{season}/{episode}',
-    priority: 1
-  },
-  {
-    id: 'vidsrc-vip',
-    name: 'vidsrc.vip',
-    url: 'vidsrc.vip',
-    movieTemplate: 'https://vidsrc.vip/embed/movie/{id}',
-    tvTemplate: 'https://vidsrc.vip/embed/tv/{id}/{season}/{episode}',
-    priority: 2
-  },
-  {
-    id: 'vidsrc-icu',
-    name: 'vidsrc.icu',
-    url: 'vidsrc.icu',
-    movieTemplate: 'https://vidsrc.icu/embed/movie/{id}',
-    tvTemplate: 'https://vidsrc.icu/embed/tv/{id}/{season}/{episode}',
-    priority: 3
   },
   {
     id: 'vidsrc-cc',
@@ -48,39 +25,7 @@ export const DEFAULT_SERVERS: StreamingServer[] = [
     url: 'vidsrc.cc/v2',
     movieTemplate: 'https://vidsrc.cc/v2/embed/movie/{id}',
     tvTemplate: 'https://vidsrc.cc/v2/embed/tv/{id}/{season}/{episode}',
-    priority: 4
-  },
-  {
-    id: 'embed-su',
-    name: 'embed.su',
-    url: 'embed.su',
-    movieTemplate: 'https://embed.su/embed/movie/{id}',
-    tvTemplate: 'https://embed.su/embed/tv/{id}/{season}/{episode}',
-    priority: 5
-  },
-  {
-    id: 'vidsrc-me',
-    name: 'vidsrc.me',
-    url: 'vidsrc.me',
-    movieTemplate: 'https://vidsrc.me/embed/movie/{id}',
-    tvTemplate: 'https://vidsrc.me/embed/tv/{id}/{season}/{episode}',
-    priority: 6
-  },
-  {
-    id: 'autoembed-pro',
-    name: 'autoembed.pro',
-    url: 'autoembed.pro',
-    movieTemplate: 'https://autoembed.pro/embed/movie/{id}',
-    tvTemplate: 'https://autoembed.pro/embed/tv/{id}/{season}/{episode}',
-    priority: 7
-  },
-  {
-    id: 'vidfast-pro',
-    name: 'vidfast.pro',
-    url: 'vidfast.pro',
-    movieTemplate: 'https://vidfast.pro/movie/{id}',
-    tvTemplate: 'https://vidfast.pro/embed/tv/{id}/{season}/{episode}',
-    priority: 8
+    priority: 1
   },
   {
     id: 'videasy',
@@ -88,7 +33,7 @@ export const DEFAULT_SERVERS: StreamingServer[] = [
     url: 'player.videasy.net',
     movieTemplate: 'https://player.videasy.net/movie/{id}',
     tvTemplate: 'https://player.videasy.net/tv/{id}/{season}/{episode}',
-    priority: 9
+    priority: 2
   },
   {
     id: 'autoembed-cc',
@@ -96,7 +41,55 @@ export const DEFAULT_SERVERS: StreamingServer[] = [
     url: 'player.autoembed.cc',
     movieTemplate: 'https://player.autoembed.cc/embed/movie/{id}',
     tvTemplate: 'https://player.autoembed.cc/embed/tv/{id}/{season}/{episode}',
-    priority: 10
+    priority: 3
+  },
+  {
+    id: 'vidsrc-vip',
+    name: 'vidsrc.vip',
+    url: 'vidsrc.vip',
+    movieTemplate: 'https://vidsrc.vip/embed/movie/{id}',
+    tvTemplate: 'https://vidsrc.vip/embed/tv/{id}/{season}/{episode}',
+    priority: 4
+  },
+  {
+    id: 'vidsrc-icu',
+    name: 'vidsrc.icu',
+    url: 'vidsrc.icu',
+    movieTemplate: 'https://vidsrc.icu/embed/movie/{id}',
+    tvTemplate: 'https://vidsrc.icu/embed/tv/{id}/{season}/{episode}',
+    priority: 5
+  },
+  {
+    id: 'vidsrc-to',
+    name: 'vidsrc.to',
+    url: 'vidsrc.to',
+    movieTemplate: 'https://vidsrc.to/embed/movie/{id}',
+    tvTemplate: 'https://vidsrc.to/embed/tv/{id}/{season}/{episode}',
+    priority: 6
+  },
+  {
+    id: 'vidsrc-me',
+    name: 'vidsrc.me',
+    url: 'vidsrc.me',
+    movieTemplate: 'https://vidsrc.me/embed/movie/{id}',
+    tvTemplate: 'https://vidsrc.me/embed/tv/{id}/{season}/{episode}',
+    priority: 7
+  },
+  {
+    id: 'autoembed-pro',
+    name: 'autoembed.pro',
+    url: 'autoembed.pro',
+    movieTemplate: 'https://autoembed.pro/embed/movie/{id}',
+    tvTemplate: 'https://autoembed.pro/embed/tv/{id}/{season}/{episode}',
+    priority: 8
+  },
+  {
+    id: 'vidfast-pro',
+    name: 'vidfast.pro',
+    url: 'vidfast.pro',
+    movieTemplate: 'https://vidfast.pro/movie/{id}',
+    tvTemplate: 'https://vidfast.pro/embed/tv/{id}/{season}/{episode}',
+    priority: 9
   },
   {
     id: 'uembed',
@@ -104,6 +97,14 @@ export const DEFAULT_SERVERS: StreamingServer[] = [
     url: 'uembed.site',
     movieTemplate: 'https://uembed.site/?id={id}',
     tvTemplate: 'https://uembed.site/?id={id}&s={season}&e={episode}',
+    priority: 10
+  },
+  {
+    id: 'all-servers',
+    name: 'All Servers (IMDB)',
+    url: 'https://smrta384und.com/play/',
+    movieTemplate: 'https://smrta384und.com/play/{imdb}',
+    tvTemplate: 'https://smrta384und.com/play/{imdb}',
     priority: 11
   },
   {

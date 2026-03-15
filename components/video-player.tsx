@@ -601,7 +601,7 @@ export function VideoPlayer({
         </Button>
       )}
 
-      {/* Video iframe */}
+      {/* Video iframe - no sandbox to allow streaming servers to work */}
       <iframe
         ref={iframeRef}
         src={embedUrl}
@@ -609,7 +609,20 @@ export function VideoPlayer({
         allowFullScreen
         allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
         onLoad={handleIframeLoad}
+        onError={() => {
+          // If current server fails, try next one
+          if (isAutoFetching) {
+            tryNextServer();
+          }
+        }}
       />
+
+      {/* Tip for users about ads */}
+      <div className="absolute bottom-4 left-4 z-10">
+        <p className="text-white/40 text-xs max-w-xs">
+          Tip: If ads appear, try switching servers using the dropdown above. embed.su and vidsrc.cc usually have fewer ads.
+        </p>
+      </div>
     </div>
   );
 }
