@@ -5,8 +5,8 @@ import {
   getTrending,
   getUpcomingMovies,
   getNowPlayingMovies,
-  getAiringTodayTV,
-  getOnTheAirTV,
+  getPopularTVShows,
+  getTopRatedTVShows,
   MovieResponse,
 } from '@/lib/tmdb';
 
@@ -26,15 +26,15 @@ export default async function NewPopularPage() {
     trendingWeek,
     upcoming,
     nowPlaying,
-    airingToday,
-    onTheAir,
+    popularTV,
+    topRatedTV,
   ] = await Promise.all([
     fetchSafe(() => getTrending('day'), emptyResponse),
     fetchSafe(() => getTrending('week'), emptyResponse),
     fetchSafe(() => getUpcomingMovies(), emptyResponse),
     fetchSafe(() => getNowPlayingMovies(), emptyResponse),
-    fetchSafe(() => getAiringTodayTV(), emptyResponse),
-    fetchSafe(() => getOnTheAirTV(), emptyResponse),
+    fetchSafe(() => getPopularTVShows(), emptyResponse),
+    fetchSafe(() => getTopRatedTVShows(), emptyResponse),
   ]);
 
   const hasContent = trendingWeek.results.length > 0;
@@ -67,8 +67,8 @@ export default async function NewPopularPage() {
             <MovieRow title="Trending This Week" movies={trendingWeek.results} />
             <MovieRow title="Now Playing in Theaters" movies={nowPlaying.results} />
             <MovieRow title="Coming Soon" movies={upcoming.results} />
-            <MovieRow title="TV Shows Airing Today" movies={airingToday.results} />
-            <MovieRow title="Currently On Air" movies={onTheAir.results} />
+            <MovieRow title="Popular TV Shows" movies={popularTV.results} />
+            <MovieRow title="Top Rated TV Shows" movies={topRatedTV.results} />
           </div>
         )}
       </div>
