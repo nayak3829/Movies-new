@@ -144,25 +144,10 @@ export function VideoPlayer({
   // Block popup windows and 3rd party redirects from streaming servers
   useEffect(() => {
     const originalOpen = window.open;
-    const originalFocus = window.focus;
     
     // Override window.open to block ALL popups from streaming sites
-    window.open = function(...args) {
-      // Block all popups - streaming servers shouldn't open new windows
-      console.log('[v0] Blocked popup attempt:', args[0]);
+    window.open = function() {
       return null;
-    };
-
-    // Prevent focus stealing
-    window.focus = function() {
-      // Do nothing - prevent ads from stealing focus
-    };
-
-    // Block beforeunload to prevent redirect attempts
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // Only allow if user initiated navigation
-      e.preventDefault();
-      return;
     };
 
     // Block click events that try to open new windows
@@ -172,35 +157,18 @@ export function VideoPlayer({
       if (anchor) {
         const href = anchor.getAttribute('href');
         const targetAttr = anchor.getAttribute('target');
-        // Block external links and _blank targets from iframe context
         if (targetAttr === '_blank' || (href && (href.startsWith('http') && !href.includes(window.location.host)))) {
-          console.log('[v0] Blocked external link:', href);
           e.preventDefault();
           e.stopPropagation();
         }
       }
     };
 
-    // Block any attempt to create new windows via postMessage
-    const handleMessage = (e: MessageEvent) => {
-      // Block messages that try to trigger navigation
-      if (typeof e.data === 'string' && (e.data.includes('redirect') || e.data.includes('popup') || e.data.includes('window.open'))) {
-        console.log('[v0] Blocked suspicious postMessage:', e.data);
-        return;
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('click', handleClick, true);
-    window.addEventListener('message', handleMessage);
 
-    // Cleanup
     return () => {
       window.open = originalOpen;
-      window.focus = originalFocus;
-      window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('click', handleClick, true);
-      window.removeEventListener('message', handleMessage);
     };
   }, []);
 
@@ -499,7 +467,7 @@ export function VideoPlayer({
     >
       {/* Netflix-style Top Gradient Header */}
       <div 
-        className={`absolute top-0 left-0 right-0 z-30 transition-all duration-500 ${
+        className={`absolute top-0 left-0 right-0 z-[35] transition-all duration-500 ${
           controlsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
         }`}
       >
@@ -798,7 +766,7 @@ export function VideoPlayer({
 
       {/* Netflix-style Bottom Controls Bar */}
       <div 
-        className={`absolute bottom-0 left-0 right-0 z-30 transition-all duration-500 ${
+        className={`absolute bottom-0 left-0 right-0 z-[35] transition-all duration-500 ${
           controlsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'
         }`}
       >
@@ -986,7 +954,7 @@ export function VideoPlayer({
 
       {/* Netflix-style Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/90 z-[25]">
           <div className="flex flex-col items-center gap-6 max-w-sm text-center px-6">
             {/* Netflix-style spinner */}
             <div className="relative">
@@ -1033,41 +1001,35 @@ export function VideoPlayer({
 
       {/* Video iframe container */}
       <div className="relative w-full h-full">
-        {/* Transparent overlay to block clicks and capture mouse events */}
+        {/* Interaction overlay - shows controls on tap/move, blocks first tap ads */}
         <div 
-          className={`absolute inset-0 transition-opacity duration-300 ${
-            controlsVisible ? 'z-[5] pointer-events-none' : 'z-[25] pointer-events-auto'
+          className={`absolute inset-0 z-[10] ${
+            controlsVisible ? 'pointer-events-none' : 'pointer-events-auto'
           }`}
           onMouseMove={showControls}
-          onTouchStart={showControls}
-          onClick={(e) => {
+          onTouchStart={(e) => {
             e.preventDefault();
-            e.stopPropagation();
+            showControls();
+          }}
+          onClick={(e) => {
+            if (!controlsVisible) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
             showControls();
           }}
         />
         
-        {/* Click blocker overlay - always present to prevent ad clicks */}
-        <div 
-          className="absolute inset-0 z-[15] pointer-events-none"
-          style={{ 
-            // Allow pointer events only on center area for play/pause
-            clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0)'
-          }}
-        />
-        
-        {/* Video iframe with sandbox to restrict popups */}
+        {/* Video iframe */}
         <iframe
           ref={iframeRef}
           src={embedUrl}
           className="w-full h-full"
           allowFullScreen
           allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-          sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
           referrerPolicy="no-referrer"
           onLoad={handleIframeLoad}
           onError={() => {
-            // If current server fails, try next one
             if (isAutoFetching) {
               tryNextServer();
             }
