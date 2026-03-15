@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, Bebas_Neue } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ScrollToTop } from '@/components/scroll-to-top'
+import { WhatsAppPopup } from '@/components/whatsapp-popup'
 import './globals.css'
 
 const inter = Inter({ 
@@ -47,6 +48,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${bebasNeue.variable} font-sans antialiased`}>
         {children}
+        <WhatsAppPopup />
         <ScrollToTop />
         <Analytics />
       </body>
