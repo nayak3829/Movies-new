@@ -35,11 +35,13 @@ export function Navbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isServersDialogOpen, setIsServersDialogOpen] = useState(false);
+  const [serversList, setServersList] = useState<ReturnType<typeof getServersListData>>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
 
   // Get servers sorted by reliability for the dialog
-  const getServersList = () => {
+  const getServersListData = () => {
     const servers = getAllServers();
     const stats = getServerStats();
     
@@ -56,6 +58,23 @@ export function Navbar() {
       };
     });
   };
+
+  // Auto-fetch servers data when dialog is open
+  useEffect(() => {
+    if (!isServersDialogOpen) return;
+
+    // Initial fetch
+    setServersList(getServersListData());
+    setLastUpdated(new Date());
+
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(() => {
+      setServersList(getServersListData());
+      setLastUpdated(new Date());
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isServersDialogOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -337,10 +356,19 @@ export function Navbar() {
               <Server className="w-5 h-5 text-primary" />
               Servers - Sorted by Reliability
             </DialogTitle>
+            {lastUpdated && (
+              <p className="text-xs text-muted-foreground flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                Auto-updating every 5s
+              </p>
+            )}
           </DialogHeader>
           
           <div className="space-y-2 overflow-y-auto max-h-[60vh] pr-2">
-            {getServersList().map((server, index) => {
+            {serversList.map((server, index) => {
               const hasStats = server.total > 0;
               const isGood = server.successRate !== null && server.successRate > 0.7;
               const isMedium = server.successRate !== null && server.successRate > 0.4 && server.successRate <= 0.7;
