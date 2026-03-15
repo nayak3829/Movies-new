@@ -35,7 +35,7 @@ export function WhatsAppPopup() {
 
   const handleJoin = () => {
     // Replace with your actual WhatsApp channel link
-    window.open('https://whatsapp.com/channel/YOUR_CHANNEL_ID', '_blank');
+    window.open('https://whatsapp.com/channel/0029Vadk2XHLSmbX3oEVmX37', '_blank');
     handleClose();
   };
 
