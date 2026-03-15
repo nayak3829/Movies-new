@@ -593,7 +593,9 @@ export function VideoPlayer({
         src={embedUrl}
         className="w-full h-full"
         allowFullScreen
-        allow="autoplay; fullscreen; picture-in-picture"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-popups-to-escape-sandbox"
+        referrerPolicy="no-referrer"
         onLoad={handleIframeLoad}
       />
     </div>

@@ -60,6 +60,10 @@ export function getImageUrl(path: string | null, size: 'w200' | 'w300' | 'w500' 
 }
 
 export async function fetchFromTMDB<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+  if (!TMDB_API_KEY) {
+    throw new Error('TMDB_API_KEY environment variable is not set. Please add it in project settings.');
+  }
+  
   const searchParams = new URLSearchParams({
     api_key: TMDB_API_KEY,
     ...params,
@@ -70,6 +74,9 @@ export async function fetchFromTMDB<T>(endpoint: string, params: Record<string, 
   });
   
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('TMDB API key is invalid. Please check your TMDB_API_KEY in project settings.');
+    }
     throw new Error(`TMDB API error: ${response.status}`);
   }
   
