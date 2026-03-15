@@ -92,8 +92,7 @@ export function VideoPlayer({
       : loadedServers.filter(s => s.id !== 'all-servers');
     setServers(filteredServers);
     
-    // Log server order for debugging
-    console.log('[v0] Server order for auto-fetch:', filteredServers.map(s => s.name).slice(0, 5));
+
   }, [imdbId]);
 
   // Block popup windows from streaming servers
@@ -155,7 +154,7 @@ export function VideoPlayer({
       setIsLoading(true);
       setLoadStartTime(Date.now());
       
-      console.log('[v0] Switching to server:', nextServer?.name);
+
     } else {
       setIsAutoFetching(false);
       setIsLoading(false);
@@ -187,7 +186,7 @@ export function VideoPlayer({
     setServerStatuses({});
     setStatusMessage('Finding best live server...');
     
-    console.log('[v0] Retrying with server order:', filteredServers.map(s => s.name).slice(0, 5));
+
   };
 
   const handleNextEpisode = () => {
@@ -276,7 +275,7 @@ export function VideoPlayer({
     
     timeoutRef.current = setTimeout(() => {
       if (isLoading && isAutoFetching) {
-        console.log('[v0] Server timeout:', servers[currentServerIndex]?.name);
+
         tryNextServer();
       }
     }, timeout);
@@ -299,7 +298,7 @@ export function VideoPlayer({
     if (currentId) {
       setServerStatuses(prev => ({ ...prev, [currentId]: 'success' }));
       updateServerStats(currentId, true, loadTime);
-      console.log('[v0] Server loaded successfully:', currentServer?.name, 'in', loadTime, 'ms');
+
     }
     
     setIsLoading(false);
@@ -328,177 +327,94 @@ export function VideoPlayer({
     return null;
   };
 
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-hide controls after 3 seconds
+  const showControls = useCallback(() => {
+    setControlsVisible(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      if (!isLoading && !showSettings) {
+        setControlsVisible(false);
+      }
+    }, 3000);
+  }, [isLoading, showSettings]);
+
+  useEffect(() => {
+    showControls();
+    return () => {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
+  }, [showControls]);
+
   if (servers.length === 0) {
     return (
       <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-red-600" />
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-full border-4 border-red-600/30 border-t-red-600 animate-spin" />
+          </div>
+          <p className="text-white/70 text-sm">Loading player...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black">
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black via-black/80 to-transparent p-3 sm:p-4 pb-6 sm:pb-8">
-        <div className="flex items-center justify-between gap-2 sm:gap-3">
-          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="text-white hover:bg-white/20 shrink-0 h-8 w-8 sm:h-10 sm:w-10"
-            >
-              <X className="w-5 h-5 sm:w-6 sm:h-6" />
-            </Button>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-white font-semibold text-sm sm:text-lg truncate max-w-[150px] sm:max-w-none">{title}</h2>
-              {type === 'tv' && (
-                <p className="text-white/70 text-xs sm:text-sm">
-                  S{currentSeason} E{currentEpisode}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            {/* Episode Navigation for TV - Hidden on very small screens */}
-            {type === 'tv' && (
-              <div className="hidden xs:flex items-center gap-1">
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  onClick={handlePrevEpisode}
-                  disabled={!hasPrevEpisode}
-                  className="h-7 w-7 sm:h-9 sm:w-9"
-                >
-                  <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  onClick={handleNextEpisode}
-                  disabled={!hasNextEpisode}
-                  className="h-7 w-7 sm:h-9 sm:w-9"
-                >
-                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                </Button>
+    <div 
+      className="fixed inset-0 z-50 bg-black cursor-none group"
+      onMouseMove={showControls}
+      onTouchStart={showControls}
+      onClick={showControls}
+    >
+      {/* Netflix-style Top Gradient Header */}
+      <div 
+        className={`absolute top-0 left-0 right-0 z-20 transition-all duration-500 ${
+          controlsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
+        }`}
+      >
+        <div className="bg-gradient-to-b from-black/90 via-black/60 to-transparent pt-4 pb-16 sm:pt-6 sm:pb-24 px-4 sm:px-8">
+          <div className="flex items-start justify-between gap-4">
+            {/* Left: Back Button & Title */}
+            <div className="flex items-center gap-3 sm:gap-5 min-w-0 flex-1">
+              <button
+                onClick={onClose}
+                className="group/back flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 hover:bg-white/20 hover:border-white/30 transition-all duration-300"
+              >
+                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover/back:scale-110 transition-transform" />
+              </button>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-white font-bold text-base sm:text-xl md:text-2xl truncate drop-shadow-lg">
+                  {title}
+                </h1>
+                {type === 'tv' && (
+                  <p className="text-white/60 text-xs sm:text-sm mt-0.5">
+                    Season {currentSeason}, Episode {currentEpisode}
+                  </p>
+                )}
               </div>
-            )}
+            </div>
 
-            {/* Server Selector */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="secondary" className="gap-1 sm:gap-2 h-7 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm">
-                  <Server className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="max-w-[60px] sm:max-w-[100px] truncate hidden xs:inline">{currentServer?.name}</span>
-                  {getServerStatusIcon(currentServer?.id || '')}
-                  <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto w-56">
-                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                  Servers ({servers.length}) - Sorted by reliability
-                </div>
-                {servers.map((s, index) => {
-                  const stats = getServerStats()[s.id];
-                  const total = stats ? stats.successCount + stats.failCount : 0;
-                  const successRate = total > 0 ? Math.round((stats.successCount / total) * 100) : null;
-                  const isReliable = stats && stats.successCount > stats.failCount;
-                  const isRecent = stats?.lastSuccess && (Date.now() - stats.lastSuccess) < (1000 * 60 * 60);
-                  
-                  return (
-                    <DropdownMenuItem
-                      key={s.id}
-                      onClick={() => handleServerChange(index)}
-                      className={`flex items-center justify-between ${currentServerIndex === index ? 'bg-primary/20' : ''}`}
-                    >
-                      <span className="flex items-center gap-2">
-                        {s.isCustom && <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1 rounded">Custom</span>}
-                        {isRecent && <span className="text-[10px] bg-green-500/20 text-green-400 px-1 rounded">Live</span>}
-                        {!isRecent && isReliable && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1 rounded">Good</span>}
-                        <span className="truncate max-w-[120px]">{s.name}</span>
-                      </span>
-                      <span className="flex items-center gap-1">
-                        {successRate !== null && total > 2 && (
-                          <span className={`text-[10px] ${successRate > 60 ? 'text-green-400' : successRate > 30 ? 'text-yellow-400' : 'text-red-400'}`}>
-                            {successRate}%
-                          </span>
-                        )}
-                        {getServerStatusIcon(s.id)}
-                      </span>
-                    </DropdownMenuItem>
-                  );
-                })}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleRetryAutoFetch} className="text-yellow-500">
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Auto-detect Best Server
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Right: Controls */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {/* Server Indicator (small) */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
+                <div className={`w-2 h-2 rounded-full ${serverStatuses[currentServer?.id || ''] === 'success' ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
+                <span className="text-white/80 text-xs">{currentServer?.name}</span>
+              </div>
 
-            {/* Season Selector (TV only) */}
-            {type === 'tv' && totalSeasons > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" className="gap-1 sm:gap-2 h-7 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm">
-                    S{currentSeason}
-                    <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
-                  {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((s) => (
-                    <DropdownMenuItem
-                      key={s}
-                      onClick={() => {
-                        setIsLoading(true);
-                        setLoadStartTime(Date.now());
-                        setCurrentSeason(s);
-                        setCurrentEpisode(1);
-                      }}
-                      className={currentSeason === s ? 'bg-primary/20' : ''}
-                    >
-                      Season {s}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            {/* Episode Selector (TV only) */}
-            {type === 'tv' && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" className="gap-1 sm:gap-2 h-7 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm">
-                    E{currentEpisode}
-                    <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
-                  {Array.from({ length: totalEpisodes }, (_, i) => i + 1).map((e) => (
-                    <DropdownMenuItem
-                      key={e}
-                      onClick={() => {
-                        setIsLoading(true);
-                        setLoadStartTime(Date.now());
-                        setCurrentEpisode(e);
-                      }}
-                      className={currentEpisode === e ? 'bg-primary/20' : ''}
-                    >
-                      Episode {e}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            {/* Settings Button */}
-            <Dialog open={showSettings} onOpenChange={setShowSettings}>
-              <DialogTrigger asChild>
-                <Button variant="secondary" size="icon" className="h-7 w-7 sm:h-9 sm:w-9">
-                  <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
-                </Button>
-              </DialogTrigger>
+              {/* Settings */}
+              <Dialog open={showSettings} onOpenChange={setShowSettings}>
+                <DialogTrigger asChild>
+                  <button className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 hover:bg-white/20 hover:border-white/30 transition-all duration-300 flex items-center justify-center">
+                    <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  </button>
+                </DialogTrigger>
               <DialogContent className="max-w-[calc(100vw-24px)] sm:max-w-md max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Server Settings</DialogTitle>
@@ -618,61 +534,244 @@ export function VideoPlayer({
                 </div>
               </DialogContent>
             </Dialog>
+            </div>
           </div>
         </div>
-
-        {/* Status Message */}
-        {(isLoading || isAutoFetching) && (
-          <div className="mt-2 sm:mt-3 flex items-center gap-2 text-xs sm:text-sm text-white/70">
-            <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin shrink-0" />
-            <span className="truncate">{statusMessage}</span>
-          </div>
-        )}
       </div>
 
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-5">
-          <div className="flex flex-col items-center gap-3 sm:gap-4 px-4">
-            <div className="relative">
-              <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 text-red-600 animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Server className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+      {/* Netflix-style Bottom Controls Bar */}
+      <div 
+        className={`absolute bottom-0 left-0 right-0 z-20 transition-all duration-500 ${
+          controlsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'
+        }`}
+      >
+        <div className="bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-16 pb-4 sm:pt-24 sm:pb-6 px-4 sm:px-8">
+          {/* Server Status Bar */}
+          {(isLoading || isAutoFetching) && (
+            <div className="flex items-center gap-3 mb-4 px-2">
+              <div className="relative w-5 h-5">
+                <div className="w-5 h-5 rounded-full border-2 border-red-600/30 border-t-red-600 animate-spin" />
               </div>
-            </div>
-            <div className="text-center">
-              <p className="text-white font-medium text-sm sm:text-base">{statusMessage}</p>
-              {isAutoFetching && (
-                <p className="text-white/50 text-xs sm:text-sm mt-1">
-                  Server {currentServerIndex + 1} of {servers.length}
-                </p>
+              <div className="flex-1 min-w-0">
+                <p className="text-white/90 text-sm truncate">{statusMessage}</p>
+                {isAutoFetching && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-red-600 transition-all duration-300"
+                        style={{ width: `${((currentServerIndex + 1) / servers.length) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-white/50 text-xs">{currentServerIndex + 1}/{servers.length}</span>
+                  </div>
+                )}
+              </div>
+              {!isAutoFetching && !isLoading && (
+                <button
+                  onClick={handleRetryAutoFetch}
+                  className="px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white text-xs transition-colors flex items-center gap-1.5"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  Retry
+                </button>
               )}
             </div>
+          )}
+
+          {/* Controls Row */}
+          <div className="flex items-center justify-between gap-4">
+            {/* Left: Episode Navigation */}
+            <div className="flex items-center gap-2">
+              {type === 'tv' && (
+                <>
+                  <button
+                    onClick={handlePrevEpisode}
+                    disabled={!hasPrevEpisode}
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                  >
+                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </button>
+                  <button
+                    onClick={handleNextEpisode}
+                    disabled={!hasNextEpisode}
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                  >
+                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Center: Season/Episode Selectors */}
+            {type === 'tv' && (
+              <div className="flex items-center gap-2 sm:gap-3">
+                {/* Season Selector */}
+                {totalSeasons > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="px-3 sm:px-4 py-2 rounded-md bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2">
+                        <span className="text-white text-sm sm:text-base font-medium">S{currentSeason}</span>
+                        <ChevronDown className="w-4 h-4 text-white/70" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="max-h-64 overflow-y-auto bg-zinc-900/95 backdrop-blur-sm border-white/10">
+                      {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((s) => (
+                        <DropdownMenuItem
+                          key={s}
+                          onClick={() => {
+                            setIsLoading(true);
+                            setLoadStartTime(Date.now());
+                            setCurrentSeason(s);
+                            setCurrentEpisode(1);
+                          }}
+                          className={`${currentSeason === s ? 'bg-red-600/20 text-red-500' : 'text-white'}`}
+                        >
+                          Season {s}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+
+                {/* Episode Selector */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="px-3 sm:px-4 py-2 rounded-md bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2">
+                      <span className="text-white text-sm sm:text-base font-medium">E{currentEpisode}</span>
+                      <ChevronDown className="w-4 h-4 text-white/70" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center" className="max-h-64 overflow-y-auto bg-zinc-900/95 backdrop-blur-sm border-white/10">
+                    {Array.from({ length: totalEpisodes }, (_, i) => i + 1).map((e) => (
+                      <DropdownMenuItem
+                        key={e}
+                        onClick={() => {
+                          setIsLoading(true);
+                          setLoadStartTime(Date.now());
+                          setCurrentEpisode(e);
+                        }}
+                        className={`${currentEpisode === e ? 'bg-red-600/20 text-red-500' : 'text-white'}`}
+                      >
+                        Episode {e}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+
+            {/* Right: Server Selector + Next Episode */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Server Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="px-3 sm:px-4 py-2 rounded-md bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2">
+                    <Server className="w-4 h-4 text-white/70" />
+                    <span className="text-white text-sm hidden sm:inline max-w-[80px] truncate">{currentServer?.name}</span>
+                    {getServerStatusIcon(currentServer?.id || '')}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64 max-h-80 overflow-y-auto bg-zinc-900/95 backdrop-blur-sm border-white/10">
+                  <div className="px-3 py-2 text-xs font-semibold text-white/50 border-b border-white/10">
+                    Servers - Sorted by reliability
+                  </div>
+                  {servers.map((s, index) => {
+                    const stats = getServerStats()[s.id];
+                    const total = stats ? stats.successCount + stats.failCount : 0;
+                    const successRate = total > 0 ? Math.round((stats.successCount / total) * 100) : null;
+                    const isReliable = stats && stats.successCount > stats.failCount;
+                    const isRecent = stats?.lastSuccess && (Date.now() - stats.lastSuccess) < (1000 * 60 * 60);
+                    
+                    return (
+                      <DropdownMenuItem
+                        key={s.id}
+                        onClick={() => handleServerChange(index)}
+                        className={`flex items-center justify-between py-2.5 ${currentServerIndex === index ? 'bg-red-600/20' : ''}`}
+                      >
+                        <span className="flex items-center gap-2 text-white">
+                          {isRecent && <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">LIVE</span>}
+                          {!isRecent && isReliable && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded">GOOD</span>}
+                          <span className="truncate max-w-[130px]">{s.name}</span>
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          {successRate !== null && total > 2 && (
+                            <span className={`text-xs ${successRate > 60 ? 'text-green-400' : successRate > 30 ? 'text-yellow-400' : 'text-red-400'}`}>
+                              {successRate}%
+                            </span>
+                          )}
+                          {getServerStatusIcon(s.id)}
+                        </span>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuItem onClick={handleRetryAutoFetch} className="text-red-500 py-2.5">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Auto-detect Best Server
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Next Episode Button */}
+              {type === 'tv' && hasNextEpisode && (
+                <button
+                  onClick={handleNextEpisode}
+                  className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black font-semibold hover:bg-white/90 transition-colors"
+                >
+                  <span>Next Episode</span>
+                  <SkipForward className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Netflix-style Loading Overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
+          <div className="flex flex-col items-center gap-6 max-w-sm text-center px-6">
+            {/* Netflix-style spinner */}
+            <div className="relative">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-zinc-800" />
+              <div className="absolute inset-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-transparent border-t-red-600 animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Server className="w-6 h-6 sm:w-8 sm:h-8 text-white/70" />
+              </div>
+            </div>
+            
+            <div>
+              <p className="text-white font-medium text-base sm:text-lg mb-2">{statusMessage}</p>
+              {isAutoFetching && (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="flex gap-1">
+                    {servers.slice(0, 5).map((_, i) => (
+                      <div 
+                        key={i}
+                        className={`w-2 h-2 rounded-full transition-colors ${
+                          i < currentServerIndex ? 'bg-red-600/50' : 
+                          i === currentServerIndex ? 'bg-red-600 animate-pulse' : 
+                          'bg-white/20'
+                        }`}
+                      />
+                    ))}
+                    {servers.length > 5 && <span className="text-white/30 text-xs ml-1">+{servers.length - 5}</span>}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {!isAutoFetching && (
-              <Button 
-                variant="secondary" 
+              <button
                 onClick={handleRetryAutoFetch}
-                className="gap-2 text-sm"
+                className="px-6 py-3 rounded-md bg-red-600 hover:bg-red-700 text-white font-medium transition-colors flex items-center gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
-                Try Auto-detect
-              </Button>
+                Try Again
+              </button>
             )}
           </div>
         </div>
-      )}
-
-      {/* Next Episode Button (TV only) */}
-      {type === 'tv' && hasNextEpisode && !isLoading && (
-        <Button
-          variant="secondary"
-          className="absolute bottom-16 sm:bottom-20 right-3 sm:right-4 z-10 gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 h-8 sm:h-9"
-          onClick={handleNextEpisode}
-        >
-          <SkipForward className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="hidden xs:inline">Next Episode</span>
-          <span className="xs:hidden">Next</span>
-        </Button>
       )}
 
       {/* Video iframe - no sandbox to allow streaming servers to work */}
