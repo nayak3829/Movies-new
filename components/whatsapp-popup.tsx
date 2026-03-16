@@ -35,10 +35,9 @@ export function WhatsAppPopup() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ perspective: '1200px' }}>
-      {/* Backdrop with gradient */}
+      {/* Backdrop with gradient - no auto close on click */}
       <div 
         className={`absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-emerald-950/50 backdrop-blur-xl transition-opacity duration-500 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}
-        onClick={handleClose}
       />
       
       {/* Modal */}
