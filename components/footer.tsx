@@ -91,7 +91,7 @@ export function Footer() {
 
         {/* Premium Social Links with Glassmorphism */}
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-6 md:mb-8">
-          {socialIcons.map((social, index) => {
+          {socialIcons.map((social) => {
             const Icon = social.icon;
             return (
               <a 
@@ -101,13 +101,14 @@ export function Footer() {
                 rel="noopener noreferrer" 
                 className="group relative"
                 aria-label={social.label}
+                title={social.label}
               >
                 {/* Glow effect behind */}
                 <span 
                   className={`
                     absolute inset-0 rounded-xl bg-gradient-to-br ${social.gradient} 
-                    opacity-0 group-hover:opacity-100 blur-lg 
-                    transition-all duration-500 scale-75 group-hover:scale-110
+                    opacity-0 group-hover:opacity-100 blur-md 
+                    transition-all duration-500 scale-90 group-hover:scale-125
                   `} 
                 />
                 
@@ -132,21 +133,6 @@ export function Footer() {
                       group-hover:text-white group-hover:drop-shadow-md
                     " 
                   />
-                </span>
-                
-                {/* Label tooltip */}
-                <span 
-                  className="
-                    absolute -bottom-8 left-1/2 -translate-x-1/2
-                    px-2 py-1 rounded-md
-                    bg-foreground text-background
-                    text-[10px] font-medium whitespace-nowrap
-                    opacity-0 group-hover:opacity-100
-                    translate-y-1 group-hover:translate-y-0
-                    transition-all duration-300 pointer-events-none
-                  "
-                >
-                  {social.label}
                 </span>
               </a>
             );
