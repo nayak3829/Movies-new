@@ -3,55 +3,49 @@
 import Link from 'next/link';
 import { Facebook, Instagram, Youtube, Mail, Globe, MessageCircle } from 'lucide-react';
 
-// Social media icons with unique brand colors and animations
+// Premium social media icons with glassmorphism and glow effects
 const socialIcons = [
   { 
     icon: Instagram, 
     href: 'https://www.instagram.com/techvyro', 
     label: 'Instagram',
-    color: 'hover:text-pink-500',
-    bgColor: 'hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-pink-500 hover:to-purple-600',
-    animation: 'hover:rotate-12 hover:scale-125'
+    gradient: 'from-amber-500 via-pink-500 to-purple-600',
+    shadowColor: 'shadow-pink-500/50',
   },
   { 
     icon: Youtube, 
     href: 'https://www.youtube.com/@techvyro', 
     label: 'Youtube',
-    color: 'hover:text-white',
-    bgColor: 'hover:bg-red-600',
-    animation: 'hover:scale-125 hover:-translate-y-1'
+    gradient: 'from-red-600 to-red-500',
+    shadowColor: 'shadow-red-500/50',
   },
   { 
     icon: Facebook, 
     href: 'https://www.facebook.com/share/187KsWWacM/?mibextid=wwXIfr', 
     label: 'Facebook',
-    color: 'hover:text-white',
-    bgColor: 'hover:bg-blue-600',
-    animation: 'hover:scale-125 hover:rotate-6'
+    gradient: 'from-blue-600 to-blue-500',
+    shadowColor: 'shadow-blue-500/50',
   },
   { 
     icon: MessageCircle, 
     href: 'https://whatsapp.com/channel/0029Vadk2XHLSmbX3oEVmX37', 
     label: 'WhatsApp',
-    color: 'hover:text-white',
-    bgColor: 'hover:bg-green-500',
-    animation: 'hover:scale-125 hover:animate-pulse'
+    gradient: 'from-green-500 to-emerald-400',
+    shadowColor: 'shadow-green-500/50',
   },
   { 
     icon: Globe, 
     href: 'https://www.techvyro.in/', 
     label: 'Website',
-    color: 'hover:text-white',
-    bgColor: 'hover:bg-primary',
-    animation: 'hover:scale-125 hover:rotate-180'
+    gradient: 'from-primary to-primary/80',
+    shadowColor: 'shadow-primary/50',
   },
   { 
     icon: Mail, 
     href: 'mailto:techvyro@gmail.com', 
     label: 'Email',
-    color: 'hover:text-white',
-    bgColor: 'hover:bg-orange-500',
-    animation: 'hover:scale-125 hover:-translate-y-2'
+    gradient: 'from-orange-500 to-amber-400',
+    shadowColor: 'shadow-orange-500/50',
   },
 ];
 
@@ -95,9 +89,9 @@ export function Footer() {
           <p className="text-xs md:text-sm text-muted-foreground mt-1">Your ultimate entertainment destination</p>
         </div>
 
-        {/* Social Links with Animations */}
-        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-6 md:mb-8">
-          {socialIcons.map((social, index) => {
+        {/* Premium Social Links with Glassmorphism */}
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-6 md:mb-8">
+          {socialIcons.map((social) => {
             const Icon = social.icon;
             return (
               <a 
@@ -105,17 +99,41 @@ export function Footer() {
                 href={social.href} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className={`
-                  relative p-2 sm:p-2.5 rounded-full bg-muted/30 border border-border/50
-                  transition-all duration-300 ease-out
-                  ${social.color} ${social.bgColor} ${social.animation}
-                  group overflow-hidden
-                `}
+                className="group relative"
                 aria-label={social.label}
-                style={{ animationDelay: `${index * 100}ms` }}
+                title={social.label}
               >
-                <span className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl bg-current" />
-                <Icon className="w-4 h-4 relative z-10" />
+                {/* Glow effect behind */}
+                <span 
+                  className={`
+                    absolute inset-0 rounded-xl bg-gradient-to-br ${social.gradient} 
+                    opacity-0 group-hover:opacity-100 blur-md 
+                    transition-all duration-500 scale-90 group-hover:scale-125
+                  `} 
+                />
+                
+                {/* Main button */}
+                <span 
+                  className={`
+                    relative flex items-center justify-center
+                    w-10 h-10 sm:w-11 sm:h-11 rounded-xl
+                    bg-white/5 backdrop-blur-md
+                    border border-white/10
+                    transition-all duration-300 ease-out
+                    group-hover:bg-gradient-to-br group-hover:${social.gradient}
+                    group-hover:border-white/20
+                    group-hover:shadow-lg group-hover:${social.shadowColor}
+                    group-hover:-translate-y-1 group-hover:scale-105
+                  `}
+                >
+                  <Icon 
+                    className="
+                      w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground
+                      transition-all duration-300
+                      group-hover:text-white group-hover:drop-shadow-md
+                    " 
+                  />
+                </span>
               </a>
             );
           })}

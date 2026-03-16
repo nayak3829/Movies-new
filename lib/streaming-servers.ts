@@ -8,120 +8,97 @@ export interface StreamingServer {
   priority?: number;
 }
 
-// Default streaming servers - sorted by reliability and ad-free experience
-// Servers with less/no ads are prioritized first
+// Default streaming servers - sorted by multi-audio support and reliability
+// Servers with multi-audio/subtitle support are prioritized first
+// Updated March 2026 with working servers
 export const DEFAULT_SERVERS: StreamingServer[] = [
   {
-    id: 'embed-su',
-    name: 'embed.su (Best)',
-    url: 'embed.su',
-    movieTemplate: 'https://embed.su/embed/movie/{id}',
-    tvTemplate: 'https://embed.su/embed/tv/{id}/{season}/{episode}',
+    id: 'vidsrc-cc',
+    name: 'VidSrc CC (Multi-Audio)',
+    url: 'vidsrc.cc',
+    movieTemplate: 'https://vidsrc.cc/v2/embed/movie/{id}',
+    tvTemplate: 'https://vidsrc.cc/v2/embed/tv/{id}/{season}/{episode}',
     priority: 0
   },
   {
-    id: 'vidsrc-cc',
-    name: 'vidsrc.cc/v2',
-    url: 'vidsrc.cc/v2',
-    movieTemplate: 'https://vidsrc.cc/v2/embed/movie/{id}',
-    tvTemplate: 'https://vidsrc.cc/v2/embed/tv/{id}/{season}/{episode}',
+    id: 'embed-su',
+    name: 'Embed.su (Multi-Audio)',
+    url: 'embed.su',
+    movieTemplate: 'https://embed.su/embed/movie/{id}',
+    tvTemplate: 'https://embed.su/embed/tv/{id}/{season}/{episode}',
     priority: 1
   },
   {
-    id: 'videasy',
-    name: 'player.videasy.net',
-    url: 'player.videasy.net',
-    movieTemplate: 'https://player.videasy.net/movie/{id}',
-    tvTemplate: 'https://player.videasy.net/tv/{id}/{season}/{episode}',
+    id: 'multiembed',
+    name: 'MultiEmbed (Multi-Audio)',
+    url: 'multiembed.mov',
+    movieTemplate: 'https://multiembed.mov/directstream.php?video_id={id}&tmdb=1',
+    tvTemplate: 'https://multiembed.mov/directstream.php?video_id={id}&tmdb=1&s={season}&e={episode}',
     priority: 2
   },
   {
     id: 'autoembed-cc',
-    name: 'player.autoembed.cc',
+    name: 'AutoEmbed (Multi-Audio)',
     url: 'player.autoembed.cc',
     movieTemplate: 'https://player.autoembed.cc/embed/movie/{id}',
     tvTemplate: 'https://player.autoembed.cc/embed/tv/{id}/{season}/{episode}',
     priority: 3
   },
   {
-    id: 'vidsrc-vip',
-    name: 'vidsrc.vip',
-    url: 'vidsrc.vip',
-    movieTemplate: 'https://vidsrc.vip/embed/movie/{id}',
-    tvTemplate: 'https://vidsrc.vip/embed/tv/{id}/{season}/{episode}',
+    id: 'vidsrc-pro',
+    name: 'VidSrc Pro',
+    url: 'vidsrc.pro',
+    movieTemplate: 'https://vidsrc.pro/embed/movie/{id}',
+    tvTemplate: 'https://vidsrc.pro/embed/tv/{id}/{season}/{episode}',
     priority: 4
   },
   {
-    id: 'vidsrc-icu',
-    name: 'vidsrc.icu',
-    url: 'vidsrc.icu',
-    movieTemplate: 'https://vidsrc.icu/embed/movie/{id}',
-    tvTemplate: 'https://vidsrc.icu/embed/tv/{id}/{season}/{episode}',
+    id: 'vidsrc-xyz',
+    name: 'VidSrc XYZ',
+    url: 'vidsrc.xyz',
+    movieTemplate: 'https://vidsrc.xyz/embed/movie/{id}',
+    tvTemplate: 'https://vidsrc.xyz/embed/tv/{id}/{season}/{episode}',
     priority: 5
   },
   {
-    id: 'vidsrc-to',
-    name: 'vidsrc.to',
-    url: 'vidsrc.to',
-    movieTemplate: 'https://vidsrc.to/embed/movie/{id}',
-    tvTemplate: 'https://vidsrc.to/embed/tv/{id}/{season}/{episode}',
+    id: '2embed',
+    name: '2Embed',
+    url: '2embed.cc',
+    movieTemplate: 'https://www.2embed.cc/embed/{id}',
+    tvTemplate: 'https://www.2embed.cc/embedtv/{id}&s={season}&e={episode}',
     priority: 6
   },
   {
-    id: 'vidsrc-me',
-    name: 'vidsrc.me',
-    url: 'vidsrc.me',
-    movieTemplate: 'https://vidsrc.me/embed/movie/{id}',
-    tvTemplate: 'https://vidsrc.me/embed/tv/{id}/{season}/{episode}',
+    id: 'videasy',
+    name: 'Videasy',
+    url: 'player.videasy.net',
+    movieTemplate: 'https://player.videasy.net/movie/{id}',
+    tvTemplate: 'https://player.videasy.net/tv/{id}/{season}/{episode}',
     priority: 7
   },
   {
-    id: 'autoembed-pro',
-    name: 'autoembed.pro',
-    url: 'autoembed.pro',
-    movieTemplate: 'https://autoembed.pro/embed/movie/{id}',
-    tvTemplate: 'https://autoembed.pro/embed/tv/{id}/{season}/{episode}',
+    id: 'smashystream',
+    name: 'SmashyStream',
+    url: 'embed.smashystream.com',
+    movieTemplate: 'https://embed.smashystream.com/playere.php?tmdb={id}',
+    tvTemplate: 'https://embed.smashystream.com/playere.php?tmdb={id}&season={season}&episode={episode}',
     priority: 8
   },
   {
-    id: 'vidfast-pro',
-    name: 'vidfast.pro',
-    url: 'vidfast.pro',
-    movieTemplate: 'https://vidfast.pro/movie/{id}',
-    tvTemplate: 'https://vidfast.pro/embed/tv/{id}/{season}/{episode}',
+    id: 'moviesapi',
+    name: 'MoviesAPI',
+    url: 'moviesapi.club',
+    movieTemplate: 'https://moviesapi.club/movie/{id}',
+    tvTemplate: 'https://moviesapi.club/tv/{id}-{season}-{episode}',
     priority: 9
-  },
-  {
-    id: 'uembed',
-    name: 'uembed.site',
-    url: 'uembed.site',
-    movieTemplate: 'https://uembed.site/?id={id}',
-    tvTemplate: 'https://uembed.site/?id={id}&s={season}&e={episode}',
-    priority: 10
   },
   {
     id: 'all-servers',
     name: 'All Servers (IMDB)',
-    url: 'https://smrta384und.com/play/',
+    url: 'smrta384und.com',
     movieTemplate: 'https://smrta384und.com/play/{imdb}',
     tvTemplate: 'https://smrta384und.com/play/{imdb}',
-    priority: 11
-  },
-  {
-    id: '111movies',
-    name: '111movies.com',
-    url: '111movies.com',
-    movieTemplate: 'https://111movies.com/movie/{id}',
-    tvTemplate: 'https://111movies.com/tv/{id}/season/{season}/episode/{episode}',
-    priority: 12
-  },
-  {
-    id: 'hyhd',
-    name: 'hyhd.org',
-    url: 'hyhd.org',
-    movieTemplate: 'https://hyhd.org/embed/{id}',
-    tvTemplate: 'https://hyhd.org/embed/tv/{id}/{season}/{episode}',
-    priority: 13
+    priority: 10
   }
 ];
 

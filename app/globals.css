@@ -214,11 +214,11 @@ html {
   }
 }
 
-/* Improve tap target sizes on mobile */
+/* Improve tap target sizes on mobile - more flexible for small UI elements */
 @media (max-width: 640px) {
-  button, a {
-    min-height: 44px;
-    min-width: 44px;
+  button:not(.btn-sm):not([class*="w-"]):not([class*="h-"]):not([class*="p-"]), 
+  a:not([class*="text-"]):not([class*="inline"]) {
+    min-height: 36px;
   }
 }
 
