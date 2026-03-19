@@ -9,7 +9,6 @@ import {
   getUpcomingMovies,
   getNowPlayingMovies,
   getMoviesByGenre,
-  GENRES,
   MovieResponse,
 } from '@/lib/tmdb';
 

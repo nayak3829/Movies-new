@@ -146,9 +146,6 @@ export function VideoPlayer({
       : loadedServers.filter(s => s.id !== 'all-servers');
     setServers(filteredServers);
     
-    console.log("[v0] Loaded servers:", filteredServers.map(s => s.name));
-    console.log("[v0] TMDB ID:", tmdbId, "Type:", type, "IMDB:", imdbId);
-    
     // Start auto-fetch immediately with best server
     if (filteredServers.length > 0) {
       setIsAutoFetching(true);
@@ -160,8 +157,6 @@ export function VideoPlayer({
       const firstServer = filteredServers[0];
       const stats = getServerStats()[firstServer?.id];
       const hasGoodStats = stats && stats.successCount > stats.failCount;
-      
-      console.log("[v0] Starting with server:", firstServer?.name, "URL template:", firstServer?.movieTemplate);
       
       setStatusMessage(
         hasGoodStats 
@@ -206,13 +201,6 @@ export function VideoPlayer({
   const embedUrl = currentServer 
     ? getEmbedUrl(currentServer, tmdbId, type, currentSeason, currentEpisode, imdbId)
     : '';
-  
-  // Debug log embed URL when it changes
-  useEffect(() => {
-    if (embedUrl) {
-      console.log("[v0] Current embed URL:", embedUrl);
-    }
-  }, [embedUrl]);
 
   const totalEpisodes = episodesPerSeason[currentSeason - 1] || 10;
   const hasNextEpisode = type === 'tv' && (currentEpisode < totalEpisodes || currentSeason < totalSeasons);
@@ -1111,12 +1099,8 @@ export function VideoPlayer({
             allowFullScreen
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; accelerometer; gyroscope; clipboard-write"
             referrerPolicy="no-referrer-when-downgrade"
-            onLoad={() => {
-              console.log("[v0] Iframe loaded successfully:", embedUrl);
-              handleIframeLoad();
-            }}
-            onError={(e) => {
-              console.log("[v0] Iframe error:", embedUrl, e);
+            onLoad={handleIframeLoad}
+            onError={() => {
               if (isAutoFetching) {
                 tryNextServer();
               }
