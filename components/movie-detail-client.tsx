@@ -185,6 +185,7 @@ export function MovieDetailClient({ movie }: MovieDetailClientProps) {
                       alt={actor.name}
                       fill
                       className="object-cover"
+                      sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, 128px"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-xl md:text-3xl text-muted-foreground bg-gradient-to-br from-muted to-muted/50">

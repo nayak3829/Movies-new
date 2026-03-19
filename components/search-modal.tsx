@@ -119,6 +119,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         alt={title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 20vw, 16vw"
                       />
                     </div>
                     <h3 className="text-xs sm:text-sm font-medium truncate">{title}</h3>
