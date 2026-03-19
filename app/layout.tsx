@@ -3,6 +3,7 @@ import { Inter, Bebas_Neue } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ScrollToTop } from '@/components/scroll-to-top'
 import { WhatsAppPopup } from '@/components/whatsapp-popup'
+import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
 const inter = Inter({ 
@@ -47,10 +48,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`${inter.variable} ${bebasNeue.variable} font-sans antialiased`} suppressHydrationWarning>
-        {children}
-        <WhatsAppPopup />
-        <ScrollToTop />
-        <Analytics />
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          {children}
+          <WhatsAppPopup />
+          <ScrollToTop />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   )
