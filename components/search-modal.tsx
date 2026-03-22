@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, Clock, TrendingUp } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
@@ -13,10 +13,44 @@ interface SearchModalProps {
   onClose: () => void;
 }
 
+const POPULAR_SEARCHES = [
+  'Avengers', 'Breaking Bad', 'Stranger Things', 'The Batman',
+  'Oppenheimer', 'Game of Thrones', 'Inception', 'The Bear',
+];
+
+const RECENT_KEY = 'recentSearches';
+
+function getRecentSearches(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentSearch(query: string) {
+  if (typeof window === 'undefined' || !query.trim()) return;
+  try {
+    const existing = getRecentSearches();
+    const updated = [query, ...existing.filter(q => q !== query)].slice(0, 8);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+  } catch {
+    // ignore
+  }
+}
+
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setRecentSearches(getRecentSearches());
+    }
+  }, [isOpen]);
 
   const handleSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
@@ -28,9 +62,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     try {
       const response = await fetch(`/api/search?query=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
-      setResults(data.results?.filter((item: Movie) => item.poster_path).slice(0, 10) || []);
-    } catch (error) {
-      console.error('Search error:', error);
+      setResults(data.results?.filter((item: Movie) => item.poster_path).slice(0, 12) || []);
+    } catch {
+      // ignore
     } finally {
       setIsLoading(false);
     }
@@ -40,7 +74,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     const debounce = setTimeout(() => {
       handleSearch(query);
     }, 300);
-
     return () => clearTimeout(debounce);
   }, [query, handleSearch]);
 
@@ -52,20 +85,30 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       setQuery('');
       setResults([]);
     }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
+    return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
-
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
+
+  const handleChipClick = (term: string) => {
+    setQuery(term);
+  };
+
+  const handleResultClick = () => {
+    if (query.trim()) saveRecentSearch(query.trim());
+    onClose();
+  };
+
+  const clearRecentSearches = () => {
+    localStorage.removeItem(RECENT_KEY);
+    setRecentSearches([]);
+  };
 
   if (!isOpen) return null;
 
@@ -81,9 +124,22 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               placeholder="Search movies, TV shows..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && query.trim()) {
+                  saveRecentSearch(query.trim());
+                }
+              }}
               className="w-full pl-10 sm:pl-12 pr-4 py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg bg-secondary/80 border-border/50 focus-visible:ring-primary rounded-lg"
               autoFocus
             />
+            {query && (
+              <button
+                onClick={() => setQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted transition-colors"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -105,12 +161,11 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               {results.map((item) => {
                 const title = item.title || item.name || 'Unknown';
                 const mediaType = item.media_type || (item.first_air_date ? 'tv' : 'movie');
-                
                 return (
                   <Link
                     key={item.id}
                     href={`/${mediaType}/${item.id}`}
-                    onClick={onClose}
+                    onClick={handleResultClick}
                     className="group"
                   >
                     <div className="relative aspect-[2/3] rounded-md overflow-hidden mb-1.5 sm:mb-2 bg-muted">
@@ -132,9 +187,61 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               <p className="text-sm sm:text-base text-muted-foreground">No results found for &quot;{query}&quot;</p>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <Search className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-sm sm:text-base text-muted-foreground">Start typing to search...</p>
+            <div className="space-y-6">
+              {/* Recent Searches */}
+              {recentSearches.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <Clock className="w-4 h-4" />
+                      Recent Searches
+                    </div>
+                    <button
+                      onClick={clearRecentSearches}
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {recentSearches.map((term) => (
+                      <button
+                        key={term}
+                        onClick={() => handleChipClick(term)}
+                        className={cn(
+                          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm',
+                          'bg-secondary hover:bg-secondary/80 border border-border/50 transition-colors'
+                        )}
+                      >
+                        <Clock className="w-3 h-3 text-muted-foreground" />
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Popular Searches */}
+              <div>
+                <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
+                  <TrendingUp className="w-4 h-4" />
+                  Popular Searches
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {POPULAR_SEARCHES.map((term) => (
+                    <button
+                      key={term}
+                      onClick={() => handleChipClick(term)}
+                      className={cn(
+                        'px-3 py-1.5 rounded-full text-sm',
+                        'bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-colors'
+                      )}
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>

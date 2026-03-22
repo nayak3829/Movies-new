@@ -1,15 +1,13 @@
-import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
-import { MovieRow } from '@/components/movie-row';
+import { GenreFilter } from '@/components/genre-filter';
 import {
   getPopularMovies,
   getTopRatedMovies,
   getUpcomingMovies,
   getNowPlayingMovies,
   getMoviesByGenre,
-  GENRES,
   MovieResponse,
 } from '@/lib/tmdb';
 
@@ -27,6 +25,24 @@ async function fetchSafe<T>(fetcher: () => Promise<T>, fallback: T): Promise<T> 
     return fallback;
   }
 }
+
+const MOVIE_GENRES = [
+  { id: 28, name: 'Action' },
+  { id: 12, name: 'Adventure' },
+  { id: 16, name: 'Animation' },
+  { id: 35, name: 'Comedy' },
+  { id: 80, name: 'Crime' },
+  { id: 99, name: 'Documentary' },
+  { id: 18, name: 'Drama' },
+  { id: 14, name: 'Fantasy' },
+  { id: 27, name: 'Horror' },
+  { id: 9648, name: 'Mystery' },
+  { id: 10749, name: 'Romance' },
+  { id: 878, name: 'Sci-Fi' },
+  { id: 53, name: 'Thriller' },
+  { id: 10752, name: 'War' },
+  { id: 37, name: 'Western' },
+];
 
 export default async function MoviesPage() {
   const [
@@ -50,6 +66,17 @@ export default async function MoviesPage() {
   ]);
 
   const hasContent = popular.results.length > 0;
+
+  const initialRows = [
+    { title: 'Popular Movies', movies: popular.results },
+    { title: 'Now Playing', movies: nowPlaying.results },
+    { title: 'Top Rated', movies: topRated.results },
+    { title: 'Coming Soon', movies: upcoming.results },
+    { title: 'Action', movies: action.results },
+    { title: 'Comedy', movies: comedy.results },
+    { title: 'Horror', movies: horror.results },
+    { title: 'Science Fiction', movies: sciFi.results },
+  ];
 
   return (
     <main className="min-h-screen bg-background" suppressHydrationWarning>
@@ -75,30 +102,7 @@ export default async function MoviesPage() {
           </div>
         ) : (
           <div className="space-y-0 md:space-y-1">
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Popular Movies" movies={popular.results} showRank />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Now Playing" movies={nowPlaying.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Top Rated" movies={topRated.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Coming Soon" movies={upcoming.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Action" movies={action.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Comedy" movies={comedy.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Horror" movies={horror.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Science Fiction" movies={sciFi.results} />
-            </Suspense>
+            <GenreFilter genres={MOVIE_GENRES} initialRows={initialRows} type="movie" />
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play, Info, Volume2, VolumeX, Star } from 'lucide-react';
@@ -16,35 +16,41 @@ export function HeroBanner({ movies }: HeroBannerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [progressKey, setProgressKey] = useState(0);
 
-  const currentMovie = movies[currentIndex];
+  const SLIDE_DURATION = 8000;
+
+  const goToSlide = useCallback((index: number) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex(index);
+      setIsTransitioning(false);
+      setProgressKey(k => k + 1);
+    }, 500);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % movies.length);
-        setIsTransitioning(false);
-      }, 500);
-    }, 8000);
+      goToSlide((currentIndex + 1) % movies.length);
+    }, SLIDE_DURATION);
 
     return () => clearInterval(interval);
-  }, [movies.length]);
+  }, [movies.length, currentIndex, goToSlide]);
 
+  const currentMovie = movies[currentIndex];
   if (!currentMovie) return null;
 
   const title = currentMovie.title || currentMovie.name || 'Unknown';
-
   const mediaType = currentMovie.media_type || (currentMovie.first_air_date ? 'tv' : 'movie');
 
   return (
     <div className="relative h-[55vh] sm:h-[65vh] md:h-[80vh] lg:h-[85vh] w-full overflow-hidden">
-      {/* Background Image with Parallax Effect */}
+      {/* Background Image */}
       <div className="absolute inset-0">
-        <div 
+        <div
           className={cn(
-            "absolute inset-0 transition-all duration-700",
-            isTransitioning ? "opacity-0 scale-105" : "opacity-100 scale-100"
+            'absolute inset-0 transition-all duration-700',
+            isTransitioning ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
           )}
         >
           <Image
@@ -55,7 +61,6 @@ export function HeroBanner({ movies }: HeroBannerProps) {
             priority
           />
         </div>
-        {/* Gradient Overlays - Enhanced for better readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent md:via-background/50" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-transparent h-32" />
@@ -63,13 +68,12 @@ export function HeroBanner({ movies }: HeroBannerProps) {
 
       {/* Content */}
       <div className="relative h-full container mx-auto px-4 flex items-end pb-20 sm:pb-28 md:pb-36 lg:pb-40">
-        <div 
+        <div
           className={cn(
-            "max-w-xl md:max-w-2xl transition-all duration-500",
-            isTransitioning ? "opacity-0 translate-y-8" : "opacity-100 translate-y-0"
+            'max-w-xl md:max-w-2xl transition-all duration-500',
+            isTransitioning ? 'opacity-0 translate-y-8' : 'opacity-100 translate-y-0'
           )}
         >
-          {/* Rating Badge */}
           <div className="flex flex-wrap items-center gap-2 mb-2 md:mb-3">
             <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-2 py-1 rounded-full border border-white/10">
               <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
@@ -83,13 +87,13 @@ export function HeroBanner({ movies }: HeroBannerProps) {
             </span>
           </div>
 
-          <h1 
+          <h1
             className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-2 md:mb-3 text-balance leading-tight"
             style={{ fontFamily: 'var(--font-bebas)', letterSpacing: '0.03em' }}
           >
             {title}
           </h1>
-          
+
           <p className="text-xs sm:text-sm md:text-base text-white/70 mb-4 md:mb-5 line-clamp-2 sm:line-clamp-3 leading-relaxed max-w-lg">
             {currentMovie.overview}
           </p>
@@ -111,7 +115,7 @@ export function HeroBanner({ movies }: HeroBannerProps) {
           </div>
         </div>
 
-        {/* Mute Button - Hidden on mobile */}
+        {/* Mute Button */}
         <button
           onClick={() => setIsMuted(!isMuted)}
           className="hidden sm:flex absolute right-4 bottom-28 md:right-8 lg:right-12 md:bottom-36 p-2.5 rounded-full border border-white/30 bg-black/30 backdrop-blur-sm hover:bg-white/20 transition-all"
@@ -121,20 +125,30 @@ export function HeroBanner({ movies }: HeroBannerProps) {
         </button>
       </div>
 
-      {/* Slide Indicators - Hidden on mobile */}
-      <div className="hidden sm:flex absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 items-center gap-1.5 sm:gap-2">
+      {/* Slide Indicators with Progress */}
+      <div className="hidden sm:flex absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 items-center gap-2 sm:gap-3">
         {movies.slice(0, 5).map((_, index) => (
           <button
             key={index}
-            onClick={() => setCurrentIndex(index)}
+            onClick={() => goToSlide(index)}
             className={cn(
-              'h-1 sm:h-1.5 rounded-full transition-all duration-300',
-              index === currentIndex 
-                ? 'w-6 sm:w-8 bg-white' 
+              'relative h-1 sm:h-1.5 rounded-full transition-all duration-300 overflow-hidden',
+              index === currentIndex
+                ? 'w-14 sm:w-16 bg-white/30'
                 : 'w-1.5 sm:w-2 bg-white/40 hover:bg-white/60'
             )}
             aria-label={`Go to slide ${index + 1}`}
-          />
+          >
+            {index === currentIndex && (
+              <span
+                key={progressKey}
+                className="absolute inset-y-0 left-0 bg-white rounded-full"
+                style={{
+                  animation: `slideProgress ${SLIDE_DURATION}ms linear forwards`,
+                }}
+              />
+            )}
+          </button>
         ))}
       </div>
     </div>

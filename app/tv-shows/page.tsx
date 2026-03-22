@@ -1,8 +1,7 @@
-import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
-import { MovieRow } from '@/components/movie-row';
+import { GenreFilter } from '@/components/genre-filter';
 import {
   getPopularTVShows,
   getTopRatedTVShows,
@@ -28,6 +27,23 @@ async function fetchSafe<T>(fetcher: () => Promise<T>, fallback: T): Promise<T> 
   }
 }
 
+const TV_GENRES = [
+  { id: 10759, name: 'Action & Adventure' },
+  { id: 16, name: 'Animation' },
+  { id: 35, name: 'Comedy' },
+  { id: 80, name: 'Crime' },
+  { id: 99, name: 'Documentary' },
+  { id: 18, name: 'Drama' },
+  { id: 10751, name: 'Family' },
+  { id: 10762, name: 'Kids' },
+  { id: 9648, name: 'Mystery' },
+  { id: 10764, name: 'Reality' },
+  { id: 10765, name: 'Sci-Fi & Fantasy' },
+  { id: 10766, name: 'Soap' },
+  { id: 10768, name: 'War & Politics' },
+  { id: 37, name: 'Western' },
+];
+
 export default async function TVShowsPage() {
   const [
     popular,
@@ -51,13 +67,24 @@ export default async function TVShowsPage() {
     fetchSafe(() => getTVShowsByGenre(80), emptyResponse),
   ]);
 
-  // Filter only TV shows from trending
   const trendingTV = {
     ...trending,
     results: trending.results.filter(item => item.media_type === 'tv' || item.first_air_date),
   };
 
   const hasContent = popular.results.length > 0;
+
+  const initialRows = [
+    { title: 'Trending TV Shows', movies: trendingTV.results },
+    { title: 'Airing Today', movies: airingToday.results },
+    { title: 'Popular TV Shows', movies: popular.results },
+    { title: 'Currently On Air', movies: onTheAir.results },
+    { title: 'Top Rated TV Shows', movies: topRated.results },
+    { title: 'Drama', movies: drama.results },
+    { title: 'Comedy', movies: comedy.results },
+    { title: 'Sci-Fi & Fantasy', movies: sciFiFantasy.results },
+    { title: 'Crime', movies: crime.results },
+  ];
 
   return (
     <main className="min-h-screen bg-background" suppressHydrationWarning>
@@ -83,33 +110,7 @@ export default async function TVShowsPage() {
           </div>
         ) : (
           <div className="space-y-0 md:space-y-1">
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Trending TV Shows" movies={trendingTV.results} showRank />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Airing Today" movies={airingToday.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Popular TV Shows" movies={popular.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Currently On Air" movies={onTheAir.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Top Rated TV Shows" movies={topRated.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Drama" movies={drama.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Comedy" movies={comedy.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Sci-Fi & Fantasy" movies={sciFiFantasy.results} />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow title="Crime" movies={crime.results} />
-            </Suspense>
+            <GenreFilter genres={TV_GENRES} initialRows={initialRows} type="tv" />
           </div>
         )}
       </div>

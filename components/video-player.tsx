@@ -5,7 +5,8 @@ import {
   X, ChevronDown, Server, Loader2, CheckCircle, XCircle, 
   RefreshCw, Plus, Trash2, Settings, Zap, BarChart3,
   ChevronLeft, ChevronRight, SkipForward, Crown, Medal, Award,
-  TrendingUp, TrendingDown, Clock, Activity, Wifi, CheckCircle2, AlertTriangle
+  TrendingUp, TrendingDown, Clock, Activity, Wifi, CheckCircle2, AlertTriangle,
+  Maximize, Minimize, Keyboard, List
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -80,6 +81,26 @@ export function VideoPlayer({
   const [newServerMovie, setNewServerMovie] = useState('');
   const [newServerTv, setNewServerTv] = useState('');
   const [serverStatsRefresh, setServerStatsRefresh] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showEpisodePanel, setShowEpisodePanel] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const playerRef = useRef<HTMLDivElement>(null);
+
+  // Track fullscreen changes
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => document.removeEventListener('fullscreenchange', onFsChange);
+  }, []);
+
+  const handleFullscreen = useCallback(() => {
+    if (!playerRef.current) return;
+    if (!document.fullscreenElement) {
+      playerRef.current.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }, []);
 
   // Auto-refresh server stats when settings dialog is open
   useEffect(() => {
@@ -146,9 +167,6 @@ export function VideoPlayer({
       : loadedServers.filter(s => s.id !== 'all-servers');
     setServers(filteredServers);
     
-    console.log("[v0] Loaded servers:", filteredServers.map(s => s.name));
-    console.log("[v0] TMDB ID:", tmdbId, "Type:", type, "IMDB:", imdbId);
-    
     // Start auto-fetch immediately with best server
     if (filteredServers.length > 0) {
       setIsAutoFetching(true);
@@ -160,8 +178,6 @@ export function VideoPlayer({
       const firstServer = filteredServers[0];
       const stats = getServerStats()[firstServer?.id];
       const hasGoodStats = stats && stats.successCount > stats.failCount;
-      
-      console.log("[v0] Starting with server:", firstServer?.name, "URL template:", firstServer?.movieTemplate);
       
       setStatusMessage(
         hasGoodStats 
@@ -207,13 +223,6 @@ export function VideoPlayer({
     ? getEmbedUrl(currentServer, tmdbId, type, currentSeason, currentEpisode, imdbId)
     : '';
   
-  // Debug log embed URL when it changes
-  useEffect(() => {
-    if (embedUrl) {
-      console.log("[v0] Current embed URL:", embedUrl);
-    }
-  }, [embedUrl]);
-
   const totalEpisodes = episodesPerSeason[currentSeason - 1] || 10;
   const hasNextEpisode = type === 'tv' && (currentEpisode < totalEpisodes || currentSeason < totalSeasons);
   const hasPrevEpisode = type === 'tv' && (currentEpisode > 1 || currentSeason > 1);
@@ -278,7 +287,7 @@ export function VideoPlayer({
 
   };
 
-  const handleNextEpisode = () => {
+  const handleNextEpisode = useCallback(() => {
     if (currentEpisode < totalEpisodes) {
       setCurrentEpisode(currentEpisode + 1);
     } else if (currentSeason < totalSeasons) {
@@ -287,9 +296,9 @@ export function VideoPlayer({
     }
     setIsLoading(true);
     setLoadStartTime(Date.now());
-  };
+  }, [currentEpisode, totalEpisodes, currentSeason, totalSeasons]);
 
-  const handlePrevEpisode = () => {
+  const handlePrevEpisode = useCallback(() => {
     if (currentEpisode > 1) {
       setCurrentEpisode(currentEpisode - 1);
     } else if (currentSeason > 1) {
@@ -299,7 +308,7 @@ export function VideoPlayer({
     }
     setIsLoading(true);
     setLoadStartTime(Date.now());
-  };
+  }, [currentEpisode, currentSeason, totalSeasons, episodesPerSeason]);
 
   const handleAddServer = () => {
     if (!newServerName || !newServerMovie || !newServerTv) return;
@@ -478,6 +487,8 @@ export function VideoPlayer({
     // Keyboard listener to show controls
     const handleKeyPress = (e: KeyboardEvent) => {
       showControls();
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
       // ESC to close player
       if (e.key === 'Escape') {
         onClose();
@@ -496,6 +507,28 @@ export function VideoPlayer({
       window.removeEventListener('keydown', handleKeyPress);
     };
   }, [showControls, isLoading, showSettings, controlsVisible, onClose]);
+
+  // Dedicated keyboard shortcuts (F=fullscreen, ←→=episodes)
+  useEffect(() => {
+    const handleShortcuts = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        handleFullscreen();
+      }
+      if (e.key === 'ArrowRight' && type === 'tv') {
+        e.preventDefault();
+        handleNextEpisode();
+      }
+      if (e.key === 'ArrowLeft' && type === 'tv') {
+        e.preventDefault();
+        handlePrevEpisode();
+      }
+    };
+    window.addEventListener('keydown', handleShortcuts);
+    return () => window.removeEventListener('keydown', handleShortcuts);
+  }, [handleFullscreen, handleNextEpisode, handlePrevEpisode, type]);
 
   if (servers.length === 0) {
     return (
@@ -607,7 +640,7 @@ export function VideoPlayer({
                       <div>
                         <p className="text-[11px] font-medium text-blue-400 mb-0.5">Audio & Subtitles</p>
                         <p className="text-[10px] text-muted-foreground leading-relaxed">
-                          Video player ke andar CC/Settings icon use karein audio language aur subtitles change karne ke liye.
+                          Use the CC/Settings icon inside the player to change audio language and subtitles.
                         </p>
                       </div>
                     </div>
@@ -1112,11 +1145,9 @@ export function VideoPlayer({
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; accelerometer; gyroscope; clipboard-write"
             referrerPolicy="no-referrer-when-downgrade"
             onLoad={() => {
-              console.log("[v0] Iframe loaded successfully:", embedUrl);
               handleIframeLoad();
             }}
-            onError={(e) => {
-              console.log("[v0] Iframe error:", embedUrl, e);
+            onError={() => {
               if (isAutoFetching) {
                 tryNextServer();
               }

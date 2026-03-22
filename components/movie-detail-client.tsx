@@ -6,6 +6,7 @@ import { Play, Plus, Check, Share2, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { VideoPlayer } from '@/components/video-player';
 import { getImageUrl } from '@/lib/tmdb';
+import { saveToWatchHistory } from '@/components/continue-watching';
 
 interface MovieDetailClientProps {
   movie: {
@@ -36,6 +37,20 @@ interface MovieDetailClientProps {
 export function MovieDetailClient({ movie }: MovieDetailClientProps) {
   const [showPlayer, setShowPlayer] = useState(false);
   const [inMyList, setInMyList] = useState(false);
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const title = movie.title;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+      } catch {
+        // user cancelled or error
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+    }
+  };
 
   // Check localStorage after mount to avoid hydration mismatch
   useEffect(() => {
@@ -148,7 +163,16 @@ export function MovieDetailClient({ movie }: MovieDetailClientProps) {
                 <Button 
                   size="default"
                   className="gap-1.5 md:gap-2 bg-white text-black hover:bg-white/90 font-semibold shadow-lg text-xs sm:text-sm md:text-base px-4 md:px-6"
-                  onClick={() => setShowPlayer(true)}
+                  onClick={() => {
+                    saveToWatchHistory({
+                      id: movie.id,
+                      title: movie.title,
+                      poster_path: movie.poster_path,
+                      backdrop_path: movie.backdrop_path,
+                      media_type: 'movie',
+                    });
+                    setShowPlayer(true);
+                  }}
                 >
                   <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" />
                   Play
@@ -162,7 +186,7 @@ export function MovieDetailClient({ movie }: MovieDetailClientProps) {
                   {inMyList ? <Check className="w-4 h-4 md:w-5 md:h-5" /> : <Plus className="w-4 h-4 md:w-5 md:h-5" />}
                   {inMyList ? 'Added' : 'My List'}
                 </Button>
-                <Button size="icon" variant="outline" className="rounded-full w-9 h-9 md:w-10 md:h-10 bg-white/10 border-white/20 hover:bg-white/20">
+                <Button size="icon" variant="outline" className="rounded-full w-9 h-9 md:w-10 md:h-10 bg-white/10 border-white/20 hover:bg-white/20" onClick={handleShare} aria-label="Share">
                   <Share2 className="w-4 h-4 md:w-5 md:h-5" />
                 </Button>
               </div>

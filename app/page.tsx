@@ -3,6 +3,7 @@ import { Navbar } from '@/components/navbar';
 import { HeroBanner } from '@/components/hero-banner';
 import { MovieRow } from '@/components/movie-row';
 import { Footer } from '@/components/footer';
+import { ContinueWatching } from '@/components/continue-watching';
 import {
   getTrending,
   getPopularMovies,
@@ -94,6 +95,7 @@ export default async function HomePage() {
           <HeroBanner movies={trending.results.slice(0, 5)} />
           
           <div className="-mt-16 sm:-mt-24 md:-mt-32 relative z-10 space-y-0 md:space-y-1">
+            <ContinueWatching />
             <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
               <MovieRow 
                 title="Trending Now" 
