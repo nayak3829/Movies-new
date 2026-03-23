@@ -6,7 +6,8 @@ import {
   RefreshCw, Plus, Trash2, Settings, Zap, BarChart3,
   ChevronLeft, ChevronRight, SkipForward, Crown, Medal, Award,
   TrendingUp, TrendingDown, Clock, Activity, Wifi, CheckCircle2, AlertTriangle,
-  Maximize, Minimize, Keyboard, List
+  Maximize, Minimize, Keyboard, List,
+  Timer, Moon, Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -85,6 +86,14 @@ export function VideoPlayer({
   const [isMinimized, setIsMinimized] = useState(false);
   const [showEpisodePanel, setShowEpisodePanel] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  // Sleep Timer
+  const [sleepTimerMinutes, setSleepTimerMinutes] = useState<number | null>(null);
+  const [sleepSecondsLeft, setSleepSecondsLeft] = useState<number>(0);
+  // Autoplay Next Episode
+  const [autoplayEnabled, setAutoplayEnabled] = useState<boolean>(true);
+  const [nextEpisodeCountdown, setNextEpisodeCountdown] = useState<number | null>(null);
+  // Still Watching
+  const [showStillWatching, setShowStillWatching] = useState(false);
   const playerRef = useRef<HTMLDivElement>(null);
 
   // Track fullscreen changes
@@ -111,6 +120,30 @@ export function VideoPlayer({
     }, 5000);
     return () => clearInterval(interval);
   }, [showSettings]);
+
+  // Sleep Timer countdown
+  useEffect(() => {
+    if (sleepTimerMinutes === null) return;
+    setSleepSecondsLeft(sleepTimerMinutes * 60);
+    const interval = setInterval(() => {
+      setSleepSecondsLeft(prev => {
+        if (prev <= 1) { onClose(); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [sleepTimerMinutes, onClose]);
+
+  // "Still Watching?" prompt after 90 minutes of no interaction
+  useEffect(() => {
+    const IDLE_MS = 90 * 60 * 1000;
+    const id = setInterval(() => {
+      if (!isMinimized && !isLoading && Date.now() - lastMouseMoveRef.current >= IDLE_MS) {
+        setShowStillWatching(true);
+      }
+    }, 60_000);
+    return () => clearInterval(id);
+  }, [isMinimized, isLoading]);
 
   // Get enhanced server list with stats
   const getEnhancedServerList = () => {
@@ -289,6 +322,7 @@ export function VideoPlayer({
   };
 
   const handleNextEpisode = useCallback(() => {
+    setNextEpisodeCountdown(null);
     if (currentEpisode < totalEpisodes) {
       setCurrentEpisode(currentEpisode + 1);
     } else if (currentSeason < totalSeasons) {
@@ -298,6 +332,28 @@ export function VideoPlayer({
     setIsLoading(true);
     setLoadStartTime(Date.now());
   }, [currentEpisode, totalEpisodes, currentSeason, totalSeasons]);
+
+  // Autoplay countdown tick — when it hits 0, navigate
+  useEffect(() => {
+    if (nextEpisodeCountdown === null) return;
+    if (nextEpisodeCountdown <= 0) {
+      handleNextEpisode();
+      return;
+    }
+    const t = setTimeout(() => {
+      setNextEpisodeCountdown(prev => (prev !== null ? prev - 1 : null));
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [nextEpisodeCountdown, handleNextEpisode]);
+
+  // Click handler for the Next button — starts countdown if autoplay on
+  const handleNextEpisodeClick = useCallback(() => {
+    if (autoplayEnabled) {
+      setNextEpisodeCountdown(10);
+    } else {
+      handleNextEpisode();
+    }
+  }, [autoplayEnabled, handleNextEpisode]);
 
   const handlePrevEpisode = useCallback(() => {
     if (currentEpisode > 1) {
@@ -616,6 +672,50 @@ export function VideoPlayer({
               >
                 <Minimize className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </button>
+
+              {/* Sleep Timer */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={`hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-full backdrop-blur-sm border transition-all duration-300 items-center justify-center relative ${
+                      sleepTimerMinutes
+                        ? 'bg-amber-500/30 border-amber-400/50 hover:bg-amber-500/40'
+                        : 'bg-black/40 border-white/10 hover:bg-white/20 hover:border-white/30'
+                    }`}
+                    title="Sleep Timer"
+                  >
+                    <Timer className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    {sleepTimerMinutes && (
+                      <span className="absolute -bottom-1 -right-1 bg-amber-500 text-black text-[9px] rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5 font-bold">
+                        {Math.ceil(sleepSecondsLeft / 60)}m
+                      </span>
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-zinc-900/95 backdrop-blur-sm border-white/10 z-[60]">
+                  <div className="px-3 py-1.5 text-[10px] text-white/40 font-semibold uppercase tracking-widest">Sleep Timer</div>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  {([null, 30, 60, 90, 120] as (number | null)[]).map((mins) => (
+                    <DropdownMenuItem
+                      key={mins ?? 'off'}
+                      onClick={() => setSleepTimerMinutes(mins)}
+                      className={`text-white hover:bg-white/10 flex items-center justify-between ${sleepTimerMinutes === mins ? 'text-amber-400' : ''}`}
+                    >
+                      <span>{mins === null ? 'Off' : `${mins} minutes`}</span>
+                      {sleepTimerMinutes === mins && <CheckCircle2 className="w-3 h-3 ml-4 text-amber-400" />}
+                    </DropdownMenuItem>
+                  ))}
+                  {sleepTimerMinutes && (
+                    <>
+                      <DropdownMenuSeparator className="bg-white/10" />
+                      <div className="px-3 py-2 text-xs text-amber-400/80 flex items-center gap-1.5">
+                        <Timer className="w-3 h-3" />
+                        Closes in {Math.floor(sleepSecondsLeft / 60)}m {sleepSecondsLeft % 60}s
+                      </div>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {/* Server Indicator - clickable to open settings */}
               <button 
@@ -1086,12 +1186,27 @@ export function VideoPlayer({
               </div>
             )}
 
-            {/* Right: Next Episode Button only */}
+            {/* Right: Autoplay toggle + Next Episode Button */}
             <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Autoplay Toggle */}
+              {type === 'tv' && (
+                <button
+                  onClick={() => setAutoplayEnabled(prev => !prev)}
+                  className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-all ${
+                    autoplayEnabled
+                      ? 'bg-white/15 text-white border-white/25'
+                      : 'bg-transparent text-white/35 border-white/10'
+                  }`}
+                  title="Toggle Autoplay"
+                >
+                  <SkipForward className="w-3 h-3" />
+                  <span>Autoplay</span>
+                </button>
+              )}
               {/* Next Episode Button */}
               {type === 'tv' && hasNextEpisode && (
                 <button
-                  onClick={handleNextEpisode}
+                  onClick={handleNextEpisodeClick}
                   className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-md bg-white text-black text-xs sm:text-sm font-semibold hover:bg-white/90 transition-colors"
                 >
                   <span className="hidden sm:inline">Next</span>
@@ -1146,6 +1261,75 @@ export function VideoPlayer({
                 Try Again
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Autoplay Next Episode Countdown Overlay */}
+      {nextEpisodeCountdown !== null && !isMinimized && (
+        <div className="absolute bottom-28 right-4 sm:right-8 z-[45] w-72">
+          <div className="bg-black/85 backdrop-blur-md border border-white/15 rounded-2xl p-4 shadow-2xl">
+            <p className="text-white/50 text-[10px] font-semibold uppercase tracking-widest mb-1">Up Next</p>
+            <p className="text-white font-semibold text-sm mb-3">
+              Season {currentEpisode < totalEpisodes ? currentSeason : currentSeason + 1},&nbsp;
+              Episode {currentEpisode < totalEpisodes ? currentEpisode + 1 : 1}
+            </p>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-red-600 transition-all duration-1000"
+                  style={{ width: `${((10 - nextEpisodeCountdown) / 10) * 100}%` }}
+                />
+              </div>
+              <span className="text-white font-bold text-sm tabular-nums w-4 text-right">{nextEpisodeCountdown}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setNextEpisodeCountdown(null)}
+                className="flex-1 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleNextEpisode}
+                className="flex-1 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Play className="w-3 h-3" fill="currentColor" />
+                Play Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Still Watching Prompt */}
+      {showStillWatching && !isMinimized && (
+        <div className="absolute inset-0 z-[45] flex items-center justify-center bg-black/75 backdrop-blur-sm">
+          <div className="bg-zinc-900 border border-white/15 rounded-2xl p-6 sm:p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-white/8 flex items-center justify-center mx-auto mb-4">
+              <Moon className="w-8 h-8 text-white/60" />
+            </div>
+            <h3 className="text-white font-bold text-xl mb-2">Still watching?</h3>
+            <p className="text-white/45 text-sm mb-6">
+              You&apos;ve been watching for a while. Still there?
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 rounded-xl bg-white/8 hover:bg-white/15 text-white font-medium text-sm transition-colors"
+              >
+                Stop
+              </button>
+              <button
+                onClick={() => {
+                  setShowStillWatching(false);
+                  lastMouseMoveRef.current = Date.now();
+                }}
+                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition-colors"
+              >
+                Keep Watching
+              </button>
+            </div>
           </div>
         </div>
       )}
