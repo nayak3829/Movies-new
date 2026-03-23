@@ -1,5 +1,4 @@
 import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
 import { WatchHistoryClient } from '@/components/watch-history-client';
 
 export default function HistoryPage() {
@@ -9,7 +8,7 @@ export default function HistoryPage() {
       <div className="pt-24 pb-16 container mx-auto px-4">
         <WatchHistoryClient />
       </div>
-      <Footer />
+      
     </main>
   );
 }

@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
 import { getCollection, getImageUrl } from '@/lib/tmdb';
 import { MovieRow } from '@/components/movie-row';
 import { Film } from 'lucide-react';
@@ -77,7 +76,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         />
       </section>
 
-      <Footer />
+      
     </main>
   );
 }

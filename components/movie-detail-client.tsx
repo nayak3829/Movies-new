@@ -48,6 +48,7 @@ export function MovieDetailClient({ movie }: MovieDetailClientProps) {
   const [showPlayer, setShowPlayer] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
   const [inMyList, setInMyList] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const trailer = movie.videos?.results?.find(
     (v) => v.site === 'YouTube' && v.type === 'Trailer'
@@ -61,13 +62,13 @@ export function MovieDetailClient({ movie }: MovieDetailClientProps) {
     const url = window.location.href;
     const title = movie.title;
     if (navigator.share) {
-      try {
-        await navigator.share({ title, url });
-      } catch {
-        // user cancelled or error
-      }
+      try { await navigator.share({ title, url }); } catch {}
     } else {
-      await navigator.clipboard.writeText(url);
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {}
     }
   };
 
@@ -235,8 +236,15 @@ export function MovieDetailClient({ movie }: MovieDetailClientProps) {
                   {inMyList ? <Check className="w-4 h-4 md:w-5 md:h-5" /> : <Plus className="w-4 h-4 md:w-5 md:h-5" />}
                   {inMyList ? 'Added' : 'My List'}
                 </Button>
-                <Button size="icon" variant="outline" className="rounded-full w-9 h-9 md:w-10 md:h-10 bg-white/10 border-white/20 hover:bg-white/20" onClick={handleShare} aria-label="Share">
-                  <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className={`rounded-full w-9 h-9 md:w-10 md:h-10 border-white/20 transition-all ${copied ? 'bg-green-600/80 border-green-500' : 'bg-white/10 hover:bg-white/20'}`}
+                  onClick={handleShare}
+                  aria-label={copied ? 'Copied!' : 'Share'}
+                  title={copied ? 'Link copied!' : 'Share'}
+                >
+                  {copied ? <Check className="w-4 h-4 text-white" /> : <Share2 className="w-4 h-4 md:w-5 md:h-5" />}
                 </Button>
               </div>
             </div>
@@ -257,6 +265,7 @@ export function MovieDetailClient({ movie }: MovieDetailClientProps) {
                       src={getImageUrl(actor.profile_path, 'w200')}
                       alt={actor.name}
                       fill
+                      sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, 128px"
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (

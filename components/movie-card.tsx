@@ -83,9 +83,11 @@ export function MovieCard({ movie, index }: MovieCardProps) {
             transformStyle: 'preserve-3d',
           }}
         >
-          {/* Skeleton loader */}
+          {/* Shimmer skeleton loader */}
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-muted animate-pulse" />
+            <div className="absolute inset-0 overflow-hidden bg-muted">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            </div>
           )}
           
           <Image

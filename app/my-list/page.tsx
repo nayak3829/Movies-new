@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
 import { Plus, Trash2, Play, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -156,7 +155,7 @@ export default function MyListPage() {
         </div>
       </div>
 
-      <Footer />
+      
     </main>
   );
 }

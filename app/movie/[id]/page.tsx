@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
 import { getMovieDetails, getSimilarMovies, getMovieReviews, MovieResponse } from '@/lib/tmdb';
 import { MovieRow } from '@/components/movie-row';
 import { MovieDetailClient } from '@/components/movie-detail-client';
@@ -53,7 +52,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
         </section>
       )}
 
-      <Footer />
+      
     </main>
   );
 }

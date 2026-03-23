@@ -2,8 +2,8 @@ import { Suspense } from 'react';
 import { Navbar } from '@/components/navbar';
 import { HeroBanner } from '@/components/hero-banner';
 import { MovieRow } from '@/components/movie-row';
-import { Footer } from '@/components/footer';
 import { ContinueWatching } from '@/components/continue-watching';
+import { RecommendedRow } from '@/components/recommended-row';
 import {
   getTrending,
   getPopularMovies,
@@ -199,11 +199,10 @@ export default async function HomePage() {
                 movies={documentaries.results} 
               />
             </Suspense>
+            <RecommendedRow />
           </div>
         </>
       )}
-
-      <Footer />
     </main>
   );
 }

@@ -27,6 +27,15 @@ A Netflix-style movie and TV show streaming website built with **Next.js 16 App 
 - **Search Modal** — Advanced filters: type (movie/TV/all), era, minimum rating; recent searches in localStorage
 - **Watchlist (My List)** — Add/remove via localStorage `myList` key
 - **Video Player** — Embedded iframe player with multiple streaming server fallback; Picture-in-Picture/Mini Player mode (minimize to floating corner window)
+- **Global Footer** — Rendered in layout.tsx, appears on every page; removed from individual page files
+- **Page Transition** — Thin red progress bar at top of viewport on route changes (components/page-transition.tsx)
+- **Search Page** — Dedicated `/search?q=` URL with grid results, type filter pills (All/Movie/TV), empty state
+- **Profile Page** — `/profile` with stats (movies watched, shows watched, list count, avg rating) + quick links + danger zone
+- **Recommended for You** — Client-side row on homepage from watch history (picks dominant media type, excludes already-watched)
+- **Notification Bell** — Reads from localStorage watchHistory to show personalized notifications
+- **Share Button Feedback** — Turns green with checkmark for 2s after copying URL to clipboard
+- **Shimmer Skeleton** — Gradient sweep animation on movie card loading state instead of simple pulse
+- **Image Sizes** — `sizes` prop added to cast images on movie and TV detail pages (eliminates Next.js warnings)
 - **Similar Content** — "More Like This" section on movie/TV detail pages
 - **Top 10 Lists** — Netflix-style numbered rank badges on Trending rows
 - **User Reviews** — TMDB reviews with Load More on movie/TV detail pages
@@ -55,13 +64,15 @@ A Netflix-style movie and TV show streaming website built with **Next.js 16 App 
 - `TMDB_API_KEY` — Required, from themoviedb.org
 
 ## Pages
-- `/` — Home with hero, continue watching, genre rows
+- `/` — Home with hero, continue watching, recommended row, genre rows
+- `/search` — Dedicated search page with URL query param (?q=) and results grid
 - `/movies` — Movies with genre filter pills + advanced filters
 - `/tv-shows` — TV Shows with genre filter pills + advanced filters
 - `/movie/[id]` — Movie detail + video player + reviews + similar
 - `/tv/[id]` — TV show detail + video player + episode guide
-- `/my-list` — Saved watchlist
+- `/my-list` — Saved watchlist with empty state CTA
 - `/new-popular` — New & popular content
-- `/history` — Full watch history with filters
+- `/history` — Full watch history with filters + empty state CTA
+- `/profile` — User profile stats + quick links + danger zone
 - `/collections` — Movie franchises/collections
 - `/person/[id]` — Actor/person pages

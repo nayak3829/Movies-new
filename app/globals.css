@@ -247,3 +247,9 @@ html {
   from { width: 0%; }
   to { width: 100%; }
 }
+
+/* Shimmer skeleton loading animation */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}

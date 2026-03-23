@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
 import { getTVDetails, getSimilarTV, getTVReviews, MovieResponse } from '@/lib/tmdb';
 import { MovieRow } from '@/components/movie-row';
 import { TVDetailClient } from '@/components/tv-detail-client';
@@ -53,7 +52,7 @@ export default async function TVPage({ params }: TVPageProps) {
         </section>
       )}
 
-      <Footer />
+      
     </main>
   );
 }

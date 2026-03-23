@@ -4,6 +4,8 @@ import { ScrollToTop } from '@/components/scroll-to-top'
 import { WhatsAppPopup } from '@/components/whatsapp-popup'
 import { MobileBottomNav } from '@/components/mobile-bottom-nav'
 import { ThemeProvider } from '@/components/theme-provider'
+import { Footer } from '@/components/footer'
+import { PageTransition } from '@/components/page-transition'
 import './globals.css'
 
 const inter = Inter({ 
@@ -60,7 +62,9 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange={false}
         >
+          <PageTransition />
           {children}
+          <Footer />
           <WhatsAppPopup />
           <ScrollToTop />
           <MobileBottomNav />

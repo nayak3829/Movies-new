@@ -58,11 +58,31 @@ export function Navbar() {
   const [serversList, setServersList] = useState<ReturnType<typeof getServersListData>>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [dynamicNotifs, setDynamicNotifs] = useState<{id:number;title:string;message:string;time:string}[]>([]);
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
+    try {
+      const history = JSON.parse(localStorage.getItem('watchHistory') || '[]');
+      const notifs = history.slice(0, 3).map((item: {id:number;title:string;media_type:string;timestamp:number}, i: number) => {
+        const mins = Math.round((Date.now() - item.timestamp) / 60000);
+        const timeStr = mins < 60 ? `${mins}m ago` : mins < 1440 ? `${Math.round(mins/60)}h ago` : `${Math.round(mins/1440)}d ago`;
+        return {
+          id: item.id + i,
+          title: item.media_type === 'tv' ? 'Continue Watching' : 'Recently Watched',
+          message: item.title,
+          time: timeStr,
+        };
+      });
+      if (notifs.length === 0) {
+        notifs.push({ id: 1, title: 'Welcome to TechVyro', message: 'Start watching movies and TV shows', time: 'now' });
+      }
+      setDynamicNotifs(notifs);
+    } catch {
+      setDynamicNotifs([{ id: 1, title: 'Welcome', message: 'Discover movies and TV shows', time: 'now' }]);
+    }
   }, []);
 
   // Get servers sorted by reliability for the dialog
@@ -170,11 +190,7 @@ export function Navbar() {
     { href: '/history', label: 'History' },
   ];
 
-  const notifications = [
-    { id: 1, title: 'New Arrival', message: 'Check out the latest movies added this week', time: '2h ago' },
-    { id: 2, title: 'Continue Watching', message: 'Resume where you left off', time: '1d ago' },
-    { id: 3, title: 'Recommended for You', message: 'Based on your watch history', time: '3d ago' },
-  ];
+  const notifications = dynamicNotifs;
 
   // Prevent hydration mismatch by rendering placeholder on server
   if (!isMounted) {
@@ -352,10 +368,10 @@ export function Navbar() {
                       </div>
                     </div>
                     <div className="py-2">
-                      <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                      <Link href="/profile" onClick={() => setIsProfileOpen(false)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
                         <User className="w-4 h-4" />
                         Manage Profile
-                      </button>
+                      </Link>
                       <Link href="/history" onClick={() => setIsProfileOpen(false)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
                         <History className="w-4 h-4" />
                         Watch History

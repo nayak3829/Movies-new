@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
 import { getPersonDetails, getImageUrl } from '@/lib/tmdb';
 import { Calendar, MapPin, Star, Clapperboard, Tv } from 'lucide-react';
 
@@ -210,7 +209,7 @@ export default async function PersonPage({ params }: PersonPageProps) {
         )}
       </div>
 
-      <Footer />
+      
     </main>
   );
 }

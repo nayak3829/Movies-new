@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
 import { getCollection, getImageUrl } from '@/lib/tmdb';
 
 export const metadata: Metadata = {
@@ -94,7 +93,7 @@ export default async function CollectionsPage() {
         </div>
       </div>
 
-      <Footer />
+      
     </main>
   );
 }

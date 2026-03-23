@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
 import { GenreFilter } from '@/components/genre-filter';
 import { LanguageFilter } from '@/components/language-filter';
 import {
@@ -109,7 +108,7 @@ export default async function MoviesPage() {
         )}
       </div>
 
-      <Footer />
+      
     </main>
   );
 }
