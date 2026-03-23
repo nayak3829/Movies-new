@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import { Star, MessageSquare } from 'lucide-react';
 import { getImageUrl, type Review } from '@/lib/tmdb';
