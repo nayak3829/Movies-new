@@ -1,12 +1,12 @@
 # TechVyro — Netflix-Style Streaming Website
 
 ## Project Overview
-A Netflix-style movie and TV show streaming website built with **Next.js 16 App Router**, **React 19**, **Tailwind CSS v4**, and the **TMDB API**. Supports movies, TV shows, search, watchlist, genre filtering, and embedded video playback via multiple streaming servers.
+A Netflix-style movie and TV show streaming website built with **Next.js 15 App Router**, **React 19**, **Tailwind CSS v4**, and the **TMDB API**. Supports movies, TV shows, search, watchlist, genre filtering, and embedded video playback via multiple streaming servers.
 
 ## Tech Stack
-- **Framework**: Next.js 16 (App Router)
+- **Framework**: Next.js 15 (App Router, ^15.3.1)
 - **UI**: React 19, Tailwind CSS v4, shadcn/ui, next-themes
-- **Data**: TMDB API (server-side, `TMDB_API_KEY` env secret)
+- **Data**: TMDB API (server-side, `TMDB_API_KEY` env secret, 4h cache)
 - **Package Manager**: npm
 - **Port**: 5000 (dev: `next dev -p 5000 -H 0.0.0.0`)
 

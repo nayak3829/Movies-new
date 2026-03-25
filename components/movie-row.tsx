@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Movie } from '@/lib/tmdb';
 import { MovieCard } from './movie-card';
@@ -97,7 +97,7 @@ export function MovieRow({ title, movies, showRank = false }: MovieRowProps) {
         ref={rowRef}
         onScroll={handleScroll}
         className="flex gap-2 sm:gap-2.5 md:gap-3 lg:gap-4 overflow-x-auto scrollbar-hide px-4 md:px-12 pb-12 md:pb-16 snap-x snap-mandatory md:snap-none"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
       >
         {movies.map((movie, index) => (
           <div 

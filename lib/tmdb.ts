@@ -82,7 +82,7 @@ export async function fetchFromTMDB<T>(endpoint: string, params: Record<string, 
   });
   
   const response = await fetch(`${TMDB_BASE_URL}${endpoint}?${searchParams}`, {
-    next: { revalidate: 3600 },
+    next: { revalidate: 14400 },
   });
   
   if (!response.ok) {

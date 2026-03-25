@@ -58,7 +58,7 @@ export function MovieCard({ movie, index }: MovieCardProps) {
   };
 
   return (
-    <Link href={`/${mediaType}/${movie.id}`}>
+    <Link href={`/${mediaType}/${movie.id}`} style={{ touchAction: 'manipulation' }}>
       <div
         ref={cardRef}
         className={cn(
@@ -81,6 +81,7 @@ export function MovieCard({ movie, index }: MovieCardProps) {
               ? `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(1.05)`
               : 'rotateX(0) rotateY(0) scale(1)',
             transformStyle: 'preserve-3d',
+            willChange: isHovered ? 'transform' : 'auto',
           }}
         >
           {/* Shimmer skeleton loader */}

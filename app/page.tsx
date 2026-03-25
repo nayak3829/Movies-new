@@ -3,17 +3,13 @@ import { Navbar } from '@/components/navbar';
 import { HeroBanner } from '@/components/hero-banner';
 import { MovieRow } from '@/components/movie-row';
 import { ContinueWatching } from '@/components/continue-watching';
-import { RecommendedRow } from '@/components/recommended-row';
+import { BelowFoldRows } from '@/components/below-fold-rows';
 import {
   getTrending,
   getPopularMovies,
-  getTopRatedMovies,
-  getUpcomingMovies,
   getNowPlayingMovies,
   getPopularTVShows,
-  getTopRatedTVShows,
   getMoviesByGenre,
-  getTVShowsByGenre,
   MovieResponse,
 } from '@/lib/tmdb';
 
@@ -31,39 +27,19 @@ export default async function HomePage() {
   const [
     trending,
     popular,
-    topRated,
-    upcoming,
     nowPlaying,
     popularTV,
-    topRatedTV,
     actionMovies,
     comedyMovies,
     horrorMovies,
-    sciFiMovies,
-    romanceMovies,
-    thrillerMovies,
-    animationMovies,
-    documentaries,
-    crimeTV,
-    dramaTV,
   ] = await Promise.all([
     fetchWithFallback(() => getTrending('week'), emptyResponse),
     fetchWithFallback(() => getPopularMovies(), emptyResponse),
-    fetchWithFallback(() => getTopRatedMovies(), emptyResponse),
-    fetchWithFallback(() => getUpcomingMovies(), emptyResponse),
     fetchWithFallback(() => getNowPlayingMovies(), emptyResponse),
     fetchWithFallback(() => getPopularTVShows(), emptyResponse),
-    fetchWithFallback(() => getTopRatedTVShows(), emptyResponse),
-    fetchWithFallback(() => getMoviesByGenre(28), emptyResponse), // Action
-    fetchWithFallback(() => getMoviesByGenre(35), emptyResponse), // Comedy
-    fetchWithFallback(() => getMoviesByGenre(27), emptyResponse), // Horror
-    fetchWithFallback(() => getMoviesByGenre(878), emptyResponse), // Sci-Fi
-    fetchWithFallback(() => getMoviesByGenre(10749), emptyResponse), // Romance
-    fetchWithFallback(() => getMoviesByGenre(53), emptyResponse), // Thriller
-    fetchWithFallback(() => getMoviesByGenre(16), emptyResponse), // Animation
-    fetchWithFallback(() => getMoviesByGenre(99), emptyResponse), // Documentary
-    fetchWithFallback(() => getTVShowsByGenre(80), emptyResponse), // Crime TV
-    fetchWithFallback(() => getTVShowsByGenre(18), emptyResponse), // Drama TV
+    fetchWithFallback(() => getMoviesByGenre(28), emptyResponse),
+    fetchWithFallback(() => getMoviesByGenre(35), emptyResponse),
+    fetchWithFallback(() => getMoviesByGenre(27), emptyResponse),
   ]);
 
   const hasApiKey = process.env.TMDB_API_KEY;
@@ -96,110 +72,23 @@ export default async function HomePage() {
           
           <div className="-mt-16 sm:-mt-24 md:-mt-32 relative z-10 space-y-0 md:space-y-1">
             <ContinueWatching />
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Trending Now" 
-                movies={trending.results} 
-                showRank 
-              />
+            <MovieRow title="Trending Now" movies={trending.results} showRank />
+            <MovieRow title="Popular Movies" movies={popular.results} />
+            <MovieRow title="Now Playing" movies={nowPlaying.results} />
+            <MovieRow title="Action Movies" movies={actionMovies.results} />
+            <MovieRow title="Comedy" movies={comedyMovies.results} />
+            <MovieRow title="Horror" movies={horrorMovies.results} />
+            <MovieRow title="Popular TV Shows" movies={popularTV.results} />
+
+            <Suspense fallback={
+              <div className="space-y-0 md:space-y-1">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div key={i} className="h-48 sm:h-56 md:h-64 animate-pulse bg-muted/10 rounded mx-4 md:mx-12 mb-2" />
+                ))}
+              </div>
+            }>
+              <BelowFoldRows />
             </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Popular Movies" 
-                movies={popular.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Now Playing" 
-                movies={nowPlaying.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Action Movies" 
-                movies={actionMovies.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Comedy" 
-                movies={comedyMovies.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Horror" 
-                movies={horrorMovies.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Popular TV Shows" 
-                movies={popularTV.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Sci-Fi" 
-                movies={sciFiMovies.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Thriller" 
-                movies={thrillerMovies.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Top Rated Movies" 
-                movies={topRated.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Romance" 
-                movies={romanceMovies.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Crime TV" 
-                movies={crimeTV.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Animation" 
-                movies={animationMovies.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Drama TV" 
-                movies={dramaTV.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Coming Soon" 
-                movies={upcoming.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Top Rated TV Shows" 
-                movies={topRatedTV.results} 
-              />
-            </Suspense>
-            <Suspense fallback={<div className="h-48 animate-pulse bg-muted/20" />}>
-              <MovieRow 
-                title="Documentaries" 
-                movies={documentaries.results} 
-              />
-            </Suspense>
-            <RecommendedRow />
           </div>
         </>
       )}

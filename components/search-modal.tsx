@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, X, Clock, TrendingUp, SlidersHorizontal, ChevronDown, Star, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -70,6 +70,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState<string>('100dvh');
 
   // Filters
   const [typeFilter, setTypeFilter] = useState('multi');
@@ -78,6 +79,21 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   useEffect(() => {
     if (isOpen) setRecentSearches(getRecentSearches());
+  }, [isOpen]);
+
+  // Adjust height when mobile keyboard opens/closes
+  useEffect(() => {
+    if (!isOpen) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => setViewportHeight(`${vv.height}px`);
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+    };
   }, [isOpen]);
 
   const hasActiveFilters = typeFilter !== 'multi' || decadeFilter !== '' || ratingFilter > 0;
@@ -172,8 +188,11 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/98 backdrop-blur-md">
-      <div className="container mx-auto px-4 pt-4 sm:pt-8 md:pt-16">
+    <div
+      className="fixed inset-0 z-50 bg-background/98 backdrop-blur-md overflow-hidden"
+      style={{ height: viewportHeight }}
+    >
+      <div className="container mx-auto px-4 pt-4 sm:pt-8 md:pt-16 h-full flex flex-col">
 
         {/* Search Header */}
         <div className="flex items-center gap-2 sm:gap-4 mb-3">
@@ -306,7 +325,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         )}
 
         {/* Results */}
-        <div className="max-h-[65vh] sm:max-h-[60vh] overflow-y-auto pb-8">
+        <div className="flex-1 overflow-y-auto pb-8 min-h-0" style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />

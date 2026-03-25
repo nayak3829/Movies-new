@@ -1365,6 +1365,7 @@ export function VideoPlayer({
             allowFullScreen
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; accelerometer; gyroscope; clipboard-write"
             referrerPolicy="no-referrer-when-downgrade"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-pointer-lock allow-popups-to-escape-sandbox"
             onLoad={() => {
               handleIframeLoad();
             }}
