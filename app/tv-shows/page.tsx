@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Tv } from 'lucide-react';
 
 export const revalidate = 14400;
 
@@ -95,13 +96,18 @@ export default async function TVShowsPage() {
       
       <div className="pt-20 sm:pt-24 pb-4 md:pb-8">
         <div className="container mx-auto px-4 mb-4 md:mb-6">
-          <h1 
-            className="text-3xl sm:text-4xl md:text-5xl font-bold"
-            style={{ fontFamily: 'var(--font-bebas)', letterSpacing: '0.05em' }}
-          >
-            TV Shows
-          </h1>
-          <p className="text-sm md:text-base text-muted-foreground mt-1 md:mt-2">Binge-worthy series waiting for you</p>
+          <div className="flex items-center gap-4 border-l-4 border-primary pl-4">
+            <Tv className="w-7 h-7 text-primary flex-shrink-0" />
+            <div>
+              <h1
+                className="text-3xl sm:text-4xl md:text-5xl font-bold leading-none"
+                style={{ fontFamily: 'var(--font-bebas)', letterSpacing: '0.05em' }}
+              >
+                TV Shows
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground mt-1">Binge-worthy series waiting for you</p>
+            </div>
+          </div>
         </div>
 
         {!hasContent ? (

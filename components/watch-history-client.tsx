@@ -50,7 +50,26 @@ export function WatchHistoryClient() {
     return 'Just now';
   };
 
-  if (!isMounted) return null;
+  if (!isMounted) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg animate-pulse w-10 h-10" />
+            <div className="space-y-2">
+              <div className="h-7 w-40 bg-muted rounded animate-pulse" />
+              <div className="h-4 w-24 bg-muted/60 rounded animate-pulse" />
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+          {[...Array(12)].map((_, i) => (
+            <div key={i} className="aspect-[2/3] bg-muted rounded-lg animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const filtered = items.filter(item => filter === 'all' || item.media_type === filter);
 
@@ -58,15 +77,13 @@ export function WatchHistoryClient() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <History className="w-6 h-6 text-primary" />
-          </div>
+        <div className="flex items-center gap-4 border-l-4 border-primary pl-4">
+          <History className="w-7 h-7 text-primary flex-shrink-0" />
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold" style={{ fontFamily: 'var(--font-bebas)', letterSpacing: '0.03em' }}>
+            <h1 className="text-3xl md:text-4xl font-bold leading-none" style={{ fontFamily: 'var(--font-bebas)', letterSpacing: '0.05em' }}>
               Watch History
             </h1>
-            <p className="text-muted-foreground text-sm">{items.length} titles watched</p>
+            <p className="text-muted-foreground text-sm mt-1">{items.length} titles watched</p>
           </div>
         </div>
         {items.length > 0 && (
@@ -139,6 +156,7 @@ export function WatchHistoryClient() {
                         src={getImageUrl(item.poster_path, 'w300')}
                         alt={item.title}
                         fill
+                        sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 16vw"
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (

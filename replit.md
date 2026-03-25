@@ -29,13 +29,13 @@ A Netflix-style movie and TV show streaming website built with **Next.js 15 App 
 - **Video Player** — Embedded iframe player with multiple streaming server fallback; Picture-in-Picture/Mini Player mode (minimize to floating corner window)
 - **Global Footer** — Rendered in layout.tsx, appears on every page; removed from individual page files
 - **Page Transition** — Thin red progress bar at top of viewport on route changes (components/page-transition.tsx)
-- **Search Page** — Dedicated `/search?q=` URL with grid results, type filter pills (All/Movie/TV), empty state
+- **Search Page** — Dedicated `/search?q=` URL with grid results, type filter pills (All/Movie/TV); shows "Trending Right Now" grid (via `/api/trending`) when no query is entered
 - **Profile Page** — `/profile` with stats (movies watched, shows watched, list count, avg rating) + quick links + danger zone
 - **Recommended for You** — Client-side row on homepage from watch history (picks dominant media type, excludes already-watched)
 - **Notification Bell** — Reads from localStorage watchHistory to show personalized notifications
 - **Share Button Feedback** — Turns green with checkmark for 2s after copying URL to clipboard
 - **Shimmer Skeleton** — Gradient sweep animation on movie card loading state instead of simple pulse
-- **Image Sizes** — `sizes` prop added to cast images on movie and TV detail pages (eliminates Next.js warnings)
+- **Image Sizes** — `sizes` prop added to all key images: cast, backdrop, poster on detail pages, watchlist, watch history (eliminates Next.js warnings)
 - **Similar Content** — "More Like This" section on movie/TV detail pages
 - **Top 10 Lists** — Netflix-style numbered rank badges on Trending rows
 - **User Reviews** — TMDB reviews with Load More on movie/TV detail pages

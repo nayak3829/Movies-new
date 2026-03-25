@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Navbar } from '@/components/navbar';
-import { Plus, Trash2, Play, Star } from 'lucide-react';
+import { Plus, Trash2, Play, Star, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -47,19 +47,22 @@ export default function MyListPage() {
       <div className="pt-24 pb-8 min-h-[80vh]">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 
-                className="text-4xl md:text-5xl font-bold mb-2"
-                style={{ fontFamily: 'var(--font-bebas)', letterSpacing: '0.05em' }}
-              >
-                My List
-              </h1>
-              <p className="text-muted-foreground">
-                {myList.length > 0 
-                  ? `${myList.length} title${myList.length > 1 ? 's' : ''} saved`
-                  : 'Your saved movies and TV shows'
-                }
-              </p>
+            <div className="flex items-center gap-4 border-l-4 border-primary pl-4">
+              <Bookmark className="w-7 h-7 text-primary flex-shrink-0" />
+              <div>
+                <h1
+                  className="text-4xl md:text-5xl font-bold leading-none"
+                  style={{ fontFamily: 'var(--font-bebas)', letterSpacing: '0.05em' }}
+                >
+                  My List
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  {myList.length > 0
+                    ? `${myList.length} title${myList.length > 1 ? 's' : ''} saved`
+                    : 'Your saved movies and TV shows'
+                  }
+                </p>
+              </div>
             </div>
             {myList.length > 0 && (
               <Button 
@@ -109,6 +112,7 @@ export default function MyListPage() {
                           src={getImageUrl(item.poster_path, 'w500')}
                           alt={title}
                           fill
+                          sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 16vw"
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />

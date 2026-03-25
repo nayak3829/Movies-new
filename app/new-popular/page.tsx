@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { TrendingUp } from 'lucide-react';
 
 export const revalidate = 14400;
 
@@ -53,13 +54,18 @@ export default async function NewPopularPage() {
       
       <div className="pt-24 pb-8">
         <div className="container mx-auto px-4 mb-8">
-          <h1 
-            className="text-4xl md:text-5xl font-bold"
-            style={{ fontFamily: 'var(--font-bebas)', letterSpacing: '0.05em' }}
-          >
-            New & Popular
-          </h1>
-          <p className="text-muted-foreground mt-2">Discover what's trending and upcoming</p>
+          <div className="flex items-center gap-4 border-l-4 border-primary pl-4">
+            <TrendingUp className="w-7 h-7 text-primary flex-shrink-0" />
+            <div>
+              <h1
+                className="text-4xl md:text-5xl font-bold leading-none"
+                style={{ fontFamily: 'var(--font-bebas)', letterSpacing: '0.05em' }}
+              >
+                New &amp; Popular
+              </h1>
+              <p className="text-muted-foreground mt-1">Discover what&apos;s trending and upcoming</p>
+            </div>
+          </div>
         </div>
 
         {!hasContent ? (

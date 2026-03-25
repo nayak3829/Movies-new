@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Play, Plus, Check, Share2, Star, Film, ExternalLink } from 'lucide-react';
+import { Play, Plus, Check, Share2, Star, Film, ExternalLink, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { VideoPlayer } from '@/components/video-player';
 import { TrailerModal } from '@/components/trailer-modal';
@@ -138,6 +138,7 @@ export function TVDetailClient({ show }: TVDetailClientProps) {
             src={getImageUrl(show.backdrop_path, 'original')}
             alt={title}
             fill
+            sizes="100vw"
             className="object-cover object-top sm:object-center"
             priority
           />
@@ -154,12 +155,21 @@ export function TVDetailClient({ show }: TVDetailClientProps) {
                 src={getImageUrl(show.poster_path, 'w500')}
                 alt={title}
                 fill
+                sizes="(max-width: 1024px) 192px, 256px"
                 className="object-cover"
               />
             </div>
 
             {/* Info */}
             <div className="max-w-xl md:max-w-2xl">
+              {/* Back Button */}
+              <button
+                onClick={() => window.history.back()}
+                className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm mb-4 group transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                Back
+              </button>
               <h1 
                 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-2 md:mb-3 leading-tight"
                 style={{ fontFamily: 'var(--font-bebas)', letterSpacing: '0.03em' }}
