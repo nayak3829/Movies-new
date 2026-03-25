@@ -59,7 +59,7 @@ export default async function PersonPage({ params }: PersonPageProps) {
     .slice(0, 24);
 
   return (
-    <main className="min-h-screen bg-background" suppressHydrationWarning>
+    <main className="min-h-screen bg-background pb-24 md:pb-8" suppressHydrationWarning>
       <Navbar />
 
       <div className="container mx-auto px-4 py-8 md:py-16">

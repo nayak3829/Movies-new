@@ -83,7 +83,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
   const movieReviews = reviews.status === 'fulfilled' ? reviews.value.results : [];
 
   return (
-    <main className="min-h-screen bg-background" suppressHydrationWarning>
+    <main className="min-h-screen bg-background pb-24 md:pb-8" suppressHydrationWarning>
       <Navbar />
       
       <MovieDetailClient movie={movie} />

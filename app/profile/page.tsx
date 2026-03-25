@@ -38,7 +38,7 @@ export default function ProfilePage() {
   return (
     <main className="min-h-screen bg-background">
       <Navbar />
-      <div className="pt-24 pb-12 container mx-auto px-4 max-w-3xl">
+      <div className="pt-24 pb-24 md:pb-12 container mx-auto px-4 max-w-3xl">
         {/* Profile Header */}
         <div className="flex items-center gap-5 mb-10">
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-red-700 flex items-center justify-center shadow-xl shadow-primary/30">

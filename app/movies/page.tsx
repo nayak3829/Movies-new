@@ -87,7 +87,7 @@ export default async function MoviesPage() {
     <main className="min-h-screen bg-background" suppressHydrationWarning>
       <Navbar />
       
-      <div className="pt-20 sm:pt-24 pb-4 md:pb-8">
+      <div className="pt-20 sm:pt-24 pb-24 md:pb-8">
         <div className="container mx-auto px-4 mb-4 md:mb-6">
           <div className="flex items-center gap-4 border-l-4 border-primary pl-4">
             <Film className="w-7 h-7 text-primary flex-shrink-0" />

@@ -201,12 +201,12 @@ export function WatchHistoryClient() {
                 <button
                   onClick={() => removeItem(item.id, item.media_type)}
                   className={cn(
-                    'absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/70 flex items-center justify-center',
-                    'opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600/90 z-10'
+                    'absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-black/70 flex items-center justify-center',
+                    'opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-600/90 z-10'
                   )}
                   aria-label="Remove from history"
                 >
-                  <X className="w-3 h-3 text-white" />
+                  <X className="w-3.5 h-3.5 text-white" />
                 </button>
               </div>
             );

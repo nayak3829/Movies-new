@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
   return (
     <>
       <Navbar />
-      <main className="container mx-auto px-4 py-24 max-w-4xl">
+      <main className="container mx-auto px-4 pt-24 pb-24 md:pb-12 max-w-4xl">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Privacy Policy</h1>
         <p className="text-muted-foreground mb-8 text-sm">Last updated: March 2026</p>
 

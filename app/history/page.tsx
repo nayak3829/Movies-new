@@ -5,7 +5,7 @@ export default function HistoryPage() {
   return (
     <main className="min-h-screen bg-background" suppressHydrationWarning>
       <Navbar />
-      <div className="pt-24 pb-16 container mx-auto px-4">
+      <div className="pt-24 pb-24 md:pb-16 container mx-auto px-4">
         <WatchHistoryClient />
       </div>
     </main>

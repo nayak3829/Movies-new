@@ -48,7 +48,7 @@ export default async function CollectionsPage() {
     <main className="min-h-screen bg-background" suppressHydrationWarning>
       <Navbar />
 
-      <div className="pt-20 sm:pt-24 pb-8">
+      <div className="pt-20 sm:pt-24 pb-24 md:pb-8">
         <div className="container mx-auto px-4 mb-8">
           <h1
             className="text-3xl sm:text-4xl md:text-5xl font-bold"

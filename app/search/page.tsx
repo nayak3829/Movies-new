@@ -121,7 +121,7 @@ function SearchContent() {
   return (
     <main className="min-h-screen bg-background">
       <Navbar />
-      <div className="pt-24 pb-8 container mx-auto px-4">
+      <div className="pt-24 pb-24 md:pb-8 container mx-auto px-4">
         <h1 className="text-3xl md:text-5xl font-bold mb-6" style={{ fontFamily: 'var(--font-bebas)', letterSpacing: '0.05em' }}>
           Search
         </h1>

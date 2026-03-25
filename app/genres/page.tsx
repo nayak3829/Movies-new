@@ -51,7 +51,7 @@ const TV_GENRES = [
   { id: 37,    name: 'Western',       backdrop: '/6UH52Fmau8RPsMAbQbjwN3wJSCj.jpg',  emoji: '🤠', type: 'tv' as const },
 ];
 
-function GenreCard({ genre }: { genre: typeof MOVIE_GENRES[0] | typeof TV_GENRES[0] }) {
+function GenreCard({ genre, priority = false }: { genre: typeof MOVIE_GENRES[0] | typeof TV_GENRES[0]; priority?: boolean }) {
   const href = genre.type === 'movie'
     ? `/movies?genre=${genre.id}`
     : `/tv-shows?genre=${genre.id}`;
@@ -62,6 +62,7 @@ function GenreCard({ genre }: { genre: typeof MOVIE_GENRES[0] | typeof TV_GENRES
         src={`https://image.tmdb.org/t/p/w500${genre.backdrop}`}
         alt={genre.name}
         fill
+        priority={priority}
         sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 18vw"
         className="object-cover transition-transform duration-500 group-hover:scale-110"
       />
@@ -86,7 +87,7 @@ export default function GenresPage() {
     <main className="min-h-screen bg-background" suppressHydrationWarning>
       <Navbar />
 
-      <div className="pt-20 sm:pt-24 pb-10">
+      <div className="pt-20 sm:pt-24 pb-24 md:pb-10">
         <div className="container mx-auto px-4 mb-8">
           <h1
             className="text-3xl sm:text-4xl md:text-5xl font-bold"
@@ -106,8 +107,8 @@ export default function GenresPage() {
               <h2 className="text-xl sm:text-2xl font-bold">Movie Genres</h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-              {MOVIE_GENRES.map(genre => (
-                <GenreCard key={`movie-${genre.id}`} genre={genre} />
+              {MOVIE_GENRES.map((genre, i) => (
+                <GenreCard key={`movie-${genre.id}`} genre={genre} priority={i < 6} />
               ))}
             </div>
           </section>

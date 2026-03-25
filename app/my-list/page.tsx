@@ -44,7 +44,7 @@ export default function MyListPage() {
     <main className="min-h-screen bg-background" suppressHydrationWarning>
       <Navbar />
       
-      <div className="pt-24 pb-8 min-h-[80vh]">
+      <div className="pt-24 pb-24 md:pb-8 min-h-[80vh]">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4 border-l-4 border-primary pl-4">
@@ -134,7 +134,7 @@ export default function MyListPage() {
                     {/* Remove Button */}
                     <button
                       onClick={() => removeFromList(item.id)}
-                      className="absolute top-2 right-2 p-2 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      className="absolute top-2 right-2 p-2 bg-black/60 rounded-full opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-600"
                       aria-label="Remove from list"
                     >
                       <Trash2 className="w-4 h-4" />
