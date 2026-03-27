@@ -7,6 +7,7 @@ import { Play, Info, Volume2, VolumeX, Star, Film } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Movie, getImageUrl } from '@/lib/tmdb';
 import { TrailerModal } from '@/components/trailer-modal';
+import { SurpriseMe } from '@/components/surprise-me';
 import { cn } from '@/lib/utils';
 
 interface HeroBannerProps {
@@ -146,6 +147,9 @@ export function HeroBanner({ movies }: HeroBannerProps) {
                   <span className="sm:hidden">Info</span>
                 </Button>
               </Link>
+              <div className="hidden sm:block">
+                <SurpriseMe variant="hero" />
+              </div>
             </div>
           </div>
 

@@ -16,6 +16,7 @@ interface SearchModalProps {
 const POPULAR_SEARCHES = [
   'Avengers', 'Breaking Bad', 'Stranger Things', 'The Batman',
   'Oppenheimer', 'Game of Thrones', 'Inception', 'The Bear',
+  'Wednesday', 'Dune', 'The Last of Us', 'Barbie',
 ];
 
 const RECENT_KEY = 'recentSearches';

@@ -7,6 +7,7 @@ import { MobileBottomNav } from '@/components/mobile-bottom-nav'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Footer } from '@/components/footer'
 import { PageTransition } from '@/components/page-transition'
+import { SurpriseMe } from '@/components/surprise-me'
 import './globals.css'
 
 const inter = Inter({ 
@@ -91,6 +92,7 @@ export default function RootLayout({
           {children}
           <Footer />
           <WhatsAppPopup />
+          <SurpriseMe variant="floating" />
           <ScrollToTop />
           <MobileBottomNav />
         </ThemeProvider>

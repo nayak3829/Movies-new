@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Play, Plus, ThumbsUp, ChevronDown, Star } from 'lucide-react';
 import { Movie, getImageUrl } from '@/lib/tmdb';
 import { cn } from '@/lib/utils';
+import { WatchProgress } from '@/components/watch-progress';
 
 interface MovieCardProps {
   movie: Movie;
@@ -152,6 +153,14 @@ export function MovieCard({ movie, index }: MovieCardProps) {
               <p className="text-[9px] text-gray-400">{year}</p>
             </div>
           )}
+
+          {/* Watch Progress Bar */}
+          <div className="absolute bottom-0 left-0 right-0">
+            <WatchProgress 
+              contentId={movie.id} 
+              mediaType={mediaType as 'movie' | 'tv'} 
+            />
+          </div>
         </div>
         
         {/* Glow Effect - Desktop only */}
