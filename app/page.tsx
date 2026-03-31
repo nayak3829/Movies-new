@@ -8,6 +8,7 @@ import { MovieRow } from '@/components/movie-row';
 import { ContinueWatching } from '@/components/continue-watching';
 import { BelowFoldRows } from '@/components/below-fold-rows';
 import { ComingSoon } from '@/components/coming-soon';
+import { ContentFilter } from '@/components/content-filter';
 import {
   getTrending,
   getPopularMovies,
@@ -79,6 +80,7 @@ export default async function HomePage() {
           
           <div className="-mt-16 sm:-mt-24 md:-mt-32 relative z-10 space-y-0 md:space-y-1 pb-24 md:pb-8">
             <ContinueWatching />
+            <ContentFilter />
             <MovieRow title="Trending Now" movies={trending.results} showRank />
             <MovieRow title="Popular Movies" movies={popular.results} />
             <MovieRow title="Now Playing" movies={nowPlaying.results} />

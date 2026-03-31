@@ -7,7 +7,7 @@ import {
   ChevronLeft, ChevronRight, SkipForward, Crown, Medal, Award,
   TrendingUp, TrendingDown, Clock, Activity, Wifi, CheckCircle2, AlertTriangle,
   Maximize, Minimize, Keyboard, List,
-  Timer, Moon, Play
+  Timer, Moon, Play, Download, Shield, ShieldOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -87,6 +87,8 @@ export function VideoPlayer({
   const [isMinimized, setIsMinimized] = useState(false);
   const [showEpisodePanel, setShowEpisodePanel] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [sandboxMode, setSandboxMode] = useState(false);
+  const [showDownloads, setShowDownloads] = useState(false);
   // Sleep Timer
   const [sleepTimerMinutes, setSleepTimerMinutes] = useState<number | null>(null);
   const [sleepSecondsLeft, setSleepSecondsLeft] = useState<number>(0);
@@ -254,9 +256,12 @@ export function VideoPlayer({
   }, []);
 
   const currentServer = servers[currentServerIndex];
-  const embedUrl = currentServer 
+  const baseEmbedUrl = currentServer 
     ? getEmbedUrl(currentServer, tmdbId, type, currentSeason, currentEpisode, imdbId)
     : '';
+  const embedUrl = baseEmbedUrl && sandboxMode
+    ? baseEmbedUrl + (baseEmbedUrl.includes('?') ? '&' : '?') + 'sandbox=1'
+    : baseEmbedUrl;
   
   const totalEpisodes = episodesPerSeason[currentSeason - 1] || 10;
   const hasNextEpisode = type === 'tv' && (currentEpisode < totalEpisodes || currentSeason < totalSeasons);
@@ -727,6 +732,78 @@ export function VideoPlayer({
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Download Button */}
+              <DropdownMenu open={showDownloads} onOpenChange={setShowDownloads}>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 hover:bg-white/20 hover:border-white/30 transition-all duration-300 items-center justify-center"
+                    title="Download Options"
+                  >
+                    <Download className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-zinc-900/95 backdrop-blur-sm border-white/10 z-[60] min-w-[200px]">
+                  <div className="px-3 py-1.5 text-[10px] text-white/40 font-semibold uppercase tracking-widest">Download</div>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  {type === 'movie' ? (
+                    <a
+                      href={`https://dl.vidsrc.vip/movie/${tmdbId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5 text-green-400" />
+                      Download Movie
+                    </a>
+                  ) : (
+                    <>
+                      {Array.from({ length: Math.min(totalSeasons, 5) }, (_, i) => i + 1).map(s => (
+                        <a
+                          key={s}
+                          href={`https://dl.vidsrc.vip/tv/${tmdbId}/${s}/1`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5 text-green-400" />
+                          Season {s} — Ep {currentSeason === s ? currentEpisode : 1}
+                        </a>
+                      ))}
+                      <DropdownMenuSeparator className="bg-white/10" />
+                      <a
+                        href={`https://dl.vidsrc.vip/tv/${tmdbId}/${currentSeason}/${currentEpisode}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-green-400 hover:bg-white/10 cursor-pointer transition-colors font-medium"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Current Episode (S{currentSeason}E{currentEpisode})
+                      </a>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Sandbox Mode Toggle */}
+              <button
+                onClick={() => {
+                  setSandboxMode(prev => !prev);
+                  setIsLoading(true);
+                  setLoadStartTime(Date.now());
+                }}
+                className={`hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-full backdrop-blur-sm border transition-all duration-300 items-center justify-center ${
+                  sandboxMode
+                    ? 'bg-green-500/30 border-green-400/50 hover:bg-green-500/40'
+                    : 'bg-black/40 border-white/10 hover:bg-white/20 hover:border-white/30'
+                }`}
+                title={sandboxMode ? 'Sandbox Enabled (click to disable)' : 'Enable Sandbox Mode'}
+              >
+                {sandboxMode
+                  ? <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                  : <ShieldOff className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                }
+              </button>
 
               {/* Server Indicator - clickable to open settings */}
               <button 

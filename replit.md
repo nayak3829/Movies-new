@@ -26,7 +26,10 @@ A Netflix-style movie and TV show streaming website built with **Next.js 15 App 
 - **Language Filter** — Browse movies/TV by original language (14 languages)
 - **Continue Watching** — localStorage-based watch history row on homepage; saved when Play is clicked on detail pages
 - **Watch History Page** — Full watch history at `/history` with filter (All/Movies/TV), remove individual items, clear all
-- **Search Modal** — Advanced filters: type (movie/TV/all), era, minimum rating; recent searches in localStorage
+- **Search Modal** — Advanced filters: type (movie/TV/all), era, minimum rating; recent searches in localStorage; IMDB ID search (enter `tt` prefix IDs directly)
+- **Content Filter (Browse & Filter)** — Collapsible panel on home page; filter by Year (2015-2025), Genre, and Movie/TV type via TMDB Discover API (`/api/discover`); paginated grid results
+- **Video Player Download** — Download button in top controls opens a dropdown with links via `dl.vidsrc.vip`; movies get a direct download link, TV shows get per-season and current-episode links
+- **Video Player Sandbox Mode** — Shield toggle button in top controls; appends `?sandbox=1` to the embed URL to enable iframe sandbox mode
 - **Watchlist (My List)** — Add/remove via localStorage `myList` key
 - **Video Player** — Embedded iframe player with multiple streaming server fallback; Picture-in-Picture/Mini Player mode (minimize to floating corner window)
 - **Global Footer** — Rendered in layout.tsx, appears on every page; removed from individual page files
