@@ -82,8 +82,24 @@ export default async function MoviePage({ params }: MoviePageProps) {
   const similarMovies = similar.status === 'fulfilled' ? similar.value : emptyResponse;
   const movieReviews = reviews.status === 'fulfilled' ? reviews.value.results : [];
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Movie',
+    name: movie.title,
+    description: movie.overview,
+    datePublished: movie.release_date,
+    image: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : undefined,
+    aggregateRating: movie.vote_average > 0 ? {
+      '@type': 'AggregateRating',
+      ratingValue: movie.vote_average.toFixed(1),
+      bestRating: '10',
+      ratingCount: movie.vote_count,
+    } : undefined,
+  };
+
   return (
     <main className="min-h-screen bg-background pb-24 md:pb-8" suppressHydrationWarning>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Navbar />
       
       <MovieDetailClient movie={movie} />

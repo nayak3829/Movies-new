@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ChevronDown, Star, Clock, Calendar, Play, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getImageUrl, type Episode } from '@/lib/tmdb';
 import { cn } from '@/lib/utils';
+import { getWatchProgress } from '@/components/watch-progress';
 
 interface Season {
   season_number: number;
@@ -25,13 +26,25 @@ export function EpisodeGuide({ tvId, seasons, onPlayEpisode }: EpisodeGuideProps
   const [loading, setLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [nowPlaying, setNowPlaying] = useState<Episode | null>(null);
+  const [progressMap, setProgressMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
     setLoading(true);
     setNowPlaying(null);
     fetch(`/api/season?tvId=${tvId}&season=${selectedSeason}`)
       .then((r) => r.json())
-      .then((data) => setEpisodes(data.episodes || []))
+      .then((data) => {
+        const eps: Episode[] = data.episodes || [];
+        setEpisodes(eps);
+        const map: Record<string, number> = {};
+        eps.forEach((ep) => {
+          const p = getWatchProgress(tvId, 'tv', ep.season_number, ep.episode_number);
+          if (p && p.progress > 5) {
+            map[`${ep.season_number}-${ep.episode_number}`] = p.progress;
+          }
+        });
+        setProgressMap(map);
+      })
       .catch(() => setEpisodes([]))
       .finally(() => setLoading(false));
   }, [tvId, selectedSeason]);
@@ -230,6 +243,15 @@ export function EpisodeGuide({ tvId, seasons, onPlayEpisode }: EpisodeGuideProps
                   </div>
                   {isActive && (
                     <div className="absolute inset-0 border-2 border-primary rounded-lg pointer-events-none" />
+                  )}
+                  {/* Episode watch progress bar */}
+                  {progressMap[`${ep.season_number}-${ep.episode_number}`] && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                      <div
+                        className="h-full bg-red-600"
+                        style={{ width: `${progressMap[`${ep.season_number}-${ep.episode_number}`]}%` }}
+                      />
+                    </div>
                   )}
                 </div>
 

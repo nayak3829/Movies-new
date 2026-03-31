@@ -2,9 +2,9 @@ const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p';
 
-// In-memory cache for API responses
+// In-memory cache for API responses (survives within the process lifetime)
 const cache = new Map<string, { data: unknown; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 export interface Movie {
   id: number;
@@ -79,36 +79,24 @@ export async function fetchFromTMDB<T>(endpoint: string, params: Record<string, 
   if (!TMDB_API_KEY) {
     throw new Error('TMDB_API_KEY environment variable is not set. Please add it in project settings.');
   }
-  
-  const searchParams = new URLSearchParams({
-    api_key: TMDB_API_KEY,
-    ...params,
-  });
-  
+
+  const searchParams = new URLSearchParams({ api_key: TMDB_API_KEY, ...params });
   const cacheKey = `${endpoint}?${searchParams.toString()}`;
-  
-  // Check cache first
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.data as T;
+  const url = `${TMDB_BASE_URL}${endpoint}?${searchParams}`;
+
+  // In-memory cache check
+  const mem = cache.get(cacheKey);
+  if (mem && Date.now() - mem.timestamp < CACHE_TTL) {
+    return mem.data as T;
   }
-  
-  const response = await fetch(`${TMDB_BASE_URL}${endpoint}?${searchParams}`, {
-    next: { revalidate: 3600 }, // 1 hour ISR cache
-  });
-  
+
+  const response = await fetch(url, { next: { revalidate: 14400 } }); // 4h Next.js data cache
   if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error('TMDB API key is invalid. Please check your TMDB_API_KEY in project settings.');
-    }
+    if (response.status === 401) throw new Error('TMDB API key is invalid. Please check your TMDB_API_KEY in project settings.');
     throw new Error(`TMDB API error: ${response.status}`);
   }
-  
   const data = await response.json();
-  
-  // Store in cache
   cache.set(cacheKey, { data, timestamp: Date.now() });
-  
   return data;
 }
 

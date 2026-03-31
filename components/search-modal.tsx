@@ -108,6 +108,17 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
     setIsLoading(true);
     try {
+      let filtered: Movie[] = [];
+
+      // IMDB ID search (e.g. tt1234567)
+      if (/^tt\d+$/i.test(searchQuery.trim())) {
+        const response = await fetch(`/api/imdb?id=${encodeURIComponent(searchQuery.trim())}`);
+        const data = await response.json();
+        filtered = data.results || [];
+        setResults(filtered.slice(0, 18));
+        return;
+      }
+
       const params = new URLSearchParams({ query: searchQuery });
       if (type !== 'multi') params.set('type', type);
       if (decade) params.set('year', decade);
@@ -116,7 +127,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       const response = await fetch(`/api/search?${params}`);
       const data = await response.json();
 
-      let filtered = data.results || [];
+      filtered = data.results || [];
 
       // Client-side decade filter
       if (decade) {
@@ -145,8 +156,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   }, []);
 
   useEffect(() => {
-    // Only search if query has at least 2 characters (faster perceived performance)
-    if (query.trim().length < 2) {
+    // Only search if query has at least 2 characters, or is an IMDB ID
+    const trimmed = query.trim();
+    if (trimmed.length < 2 && !/^tt/i.test(trimmed)) {
       setResults([]);
       return;
     }
@@ -208,7 +220,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search movies, TV shows..."
+              placeholder="Search movies, TV shows... or enter IMDB ID (tt1234567)"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && query.trim()) saveRecentSearch(query.trim()); }}

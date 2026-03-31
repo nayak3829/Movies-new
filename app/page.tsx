@@ -7,16 +7,9 @@ import { HeroBanner } from '@/components/hero-banner';
 import { MovieRow } from '@/components/movie-row';
 import { ContinueWatching } from '@/components/continue-watching';
 import { BelowFoldRows } from '@/components/below-fold-rows';
-import { ComingSoon } from '@/components/coming-soon';
-import {
-  getTrending,
-  getPopularMovies,
-  getNowPlayingMovies,
-  getPopularTVShows,
-  getMoviesByGenre,
-  getUpcomingMovies,
-  MovieResponse,
-} from '@/lib/tmdb';
+import { HomeFeedRows } from '@/components/home-feed-rows';
+import { ContentFilter } from '@/components/content-filter';
+import { getTrending, MovieResponse } from '@/lib/tmdb';
 
 const emptyResponse: MovieResponse = { page: 1, results: [], total_pages: 0, total_results: 0 };
 
@@ -28,26 +21,16 @@ async function fetchWithFallback<T>(fetcher: () => Promise<T>, fallback: T): Pro
   }
 }
 
+const RowSkeleton = () => (
+  <div className="space-y-0 md:space-y-1">
+    {Array.from({ length: 4 }).map((_, i) => (
+      <div key={i} className="h-48 sm:h-56 md:h-64 animate-pulse bg-muted/10 rounded mx-4 md:mx-12 mb-2" />
+    ))}
+  </div>
+);
+
 export default async function HomePage() {
-  const [
-    trending,
-    popular,
-    nowPlaying,
-    popularTV,
-    actionMovies,
-    comedyMovies,
-    horrorMovies,
-    upcoming,
-  ] = await Promise.all([
-    fetchWithFallback(() => getTrending('week'), emptyResponse),
-    fetchWithFallback(() => getPopularMovies(), emptyResponse),
-    fetchWithFallback(() => getNowPlayingMovies(), emptyResponse),
-    fetchWithFallback(() => getPopularTVShows(), emptyResponse),
-    fetchWithFallback(() => getMoviesByGenre(28), emptyResponse),
-    fetchWithFallback(() => getMoviesByGenre(35), emptyResponse),
-    fetchWithFallback(() => getMoviesByGenre(27), emptyResponse),
-    fetchWithFallback(() => getUpcomingMovies(), emptyResponse),
-  ]);
+  const trending = await fetchWithFallback(() => getTrending('week'), emptyResponse);
 
   const hasApiKey = process.env.TMDB_API_KEY;
   const hasContent = trending.results.length > 0;
@@ -79,24 +62,18 @@ export default async function HomePage() {
           
           <div className="-mt-16 sm:-mt-24 md:-mt-32 relative z-10 space-y-0 md:space-y-1 pb-24 md:pb-8">
             <ContinueWatching />
-            <MovieRow title="Trending Now" movies={trending.results} showRank />
-            <MovieRow title="Popular Movies" movies={popular.results} />
-            <MovieRow title="Now Playing" movies={nowPlaying.results} />
-            <MovieRow title="Action Movies" movies={actionMovies.results} />
-            <MovieRow title="Comedy" movies={comedyMovies.results} />
-            <MovieRow title="Horror" movies={horrorMovies.results} />
-            <MovieRow title="Popular TV Shows" movies={popularTV.results} />
-            
-            {/* Coming Soon Section */}
-            <ComingSoon movies={upcoming.results} title="Coming Soon" />
+            <ContentFilter />
 
-            <Suspense fallback={
-              <div className="space-y-0 md:space-y-1">
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <div key={i} className="h-48 sm:h-56 md:h-64 animate-pulse bg-muted/10 rounded mx-4 md:mx-12 mb-2" />
-                ))}
-              </div>
-            }>
+            {/* Trending row — data already available, renders instantly */}
+            <MovieRow title="Trending Now" movies={trending.results} showRank />
+
+            {/* Popular, Now Playing, Genres — streamed in after hero */}
+            <Suspense fallback={<RowSkeleton />}>
+              <HomeFeedRows />
+            </Suspense>
+
+            {/* Below-fold rows — streamed in last */}
+            <Suspense fallback={<RowSkeleton />}>
               <BelowFoldRows />
             </Suspense>
           </div>

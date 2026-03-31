@@ -82,8 +82,26 @@ export default async function TVPage({ params }: TVPageProps) {
   const similarShows = similar.status === 'fulfilled' ? similar.value : emptyResponse;
   const showReviews = reviews.status === 'fulfilled' ? reviews.value.results : [];
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'TVSeries',
+    name: show.name || show.title,
+    description: show.overview,
+    datePublished: show.first_air_date,
+    image: show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : undefined,
+    numberOfSeasons: show.number_of_seasons,
+    numberOfEpisodes: show.number_of_episodes,
+    aggregateRating: show.vote_average > 0 ? {
+      '@type': 'AggregateRating',
+      ratingValue: show.vote_average.toFixed(1),
+      bestRating: '10',
+      ratingCount: show.vote_count,
+    } : undefined,
+  };
+
   return (
     <main className="min-h-screen bg-background pb-24 md:pb-8" suppressHydrationWarning>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Navbar />
       
       <TVDetailClient show={show} />

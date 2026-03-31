@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, memo, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Play, Plus, ThumbsUp, ChevronDown, Star } from 'lucide-react';
+import { Play, Plus, ThumbsUp, ChevronDown, Star, Film, Tv } from 'lucide-react';
 import { Movie, getImageUrl } from '@/lib/tmdb';
 import { cn } from '@/lib/utils';
 import { WatchProgress } from '@/components/watch-progress';
@@ -22,6 +22,8 @@ function MovieCardComponent({ movie, index, priority = false }: MovieCardProps) 
   const [isMobile, setIsMobile] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
+  const [trailerKey, setTrailerKey] = useState<string | null | undefined>(undefined);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   
   const title = movie.title || movie.name || 'Unknown';
@@ -73,11 +75,25 @@ function MovieCardComponent({ movie, index, priority = false }: MovieCardProps) 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
     setRotation({ x: 0, y: 0 });
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    setTrailerKey(undefined);
   }, []);
 
   const handleMouseEnter = useCallback(() => {
-    if (!isMobile) setIsHovered(true);
-  }, [isMobile]);
+    if (!isMobile) {
+      setIsHovered(true);
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/trailer?id=${movie.id}&type=${mediaType}`);
+          const data = await res.json();
+          setTrailerKey(data.key || null);
+        } catch {
+          setTrailerKey(null);
+        }
+      }, 1500);
+    }
+  }, [isMobile, movie.id, mediaType]);
 
   return (
     <Link href={`/${mediaType}/${movie.id}`} style={{ touchAction: 'manipulation' }}>
@@ -223,17 +239,30 @@ function MovieCardComponent({ movie, index, priority = false }: MovieCardProps) 
             </div>
 
             {/* Info */}
-            <div className="flex items-center gap-2 text-xs mb-1.5">
+            <div className="flex items-center gap-2 text-xs mb-1.5 flex-wrap">
               <span className="text-green-500 font-semibold">
                 {Math.round(movie.vote_average * 10)}% Match
               </span>
               <span className="text-muted-foreground">{year}</span>
-              <span className="px-1 py-0.5 border border-muted-foreground/50 rounded text-[10px] uppercase">
-                {mediaType === 'tv' ? 'Series' : 'HD'}
+              <span className={`flex items-center gap-0.5 px-1.5 py-0.5 border rounded text-[10px] font-semibold ${mediaType === 'tv' ? 'border-blue-400/50 text-blue-400' : 'border-red-400/50 text-red-400'}`}>
+                {mediaType === 'tv' ? <><Tv className="w-2.5 h-2.5" /> TV</> : <><Film className="w-2.5 h-2.5" /> Movie</>}
               </span>
             </div>
 
             <h3 className="text-sm font-medium truncate">{title}</h3>
+
+            {/* Trailer preview — appears after 1.5s hover */}
+            {trailerKey && (
+              <div className="mt-2 rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&loop=1&playlist=${trailerKey}`}
+                  className="w-full h-full"
+                  allow="autoplay"
+                  loading="lazy"
+                  title="Trailer"
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
