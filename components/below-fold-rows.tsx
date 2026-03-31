@@ -2,7 +2,6 @@ import { MovieRow } from './movie-row';
 import { RecommendedRow } from './recommended-row';
 import {
   getTopRatedMovies,
-  getUpcomingMovies,
   getTopRatedTVShows,
   getMoviesByGenre,
   getTVShowsByGenre,
@@ -22,7 +21,6 @@ async function fetchWithFallback<T>(fetcher: () => Promise<T>, fallback: T): Pro
 export async function BelowFoldRows() {
   const [
     topRated,
-    upcoming,
     topRatedTV,
     sciFiMovies,
     romanceMovies,
@@ -33,7 +31,6 @@ export async function BelowFoldRows() {
     dramaTV,
   ] = await Promise.all([
     fetchWithFallback(() => getTopRatedMovies(), emptyResponse),
-    fetchWithFallback(() => getUpcomingMovies(), emptyResponse),
     fetchWithFallback(() => getTopRatedTVShows(), emptyResponse),
     fetchWithFallback(() => getMoviesByGenre(878), emptyResponse),
     fetchWithFallback(() => getMoviesByGenre(10749), emptyResponse),
@@ -53,7 +50,6 @@ export async function BelowFoldRows() {
       <MovieRow title="Crime TV" movies={crimeTV.results} />
       <MovieRow title="Animation" movies={animationMovies.results} />
       <MovieRow title="Drama TV" movies={dramaTV.results} />
-      <MovieRow title="Coming Soon" movies={upcoming.results} />
       <MovieRow title="Top Rated TV Shows" movies={topRatedTV.results} />
       <MovieRow title="Documentaries" movies={documentaries.results} />
       <RecommendedRow />
