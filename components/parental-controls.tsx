@@ -34,7 +34,7 @@ export function getParentalSettings(): { rating: AgeRating; pinEnabled: boolean 
   }
 }
 
-export function saveParentalSettings(settings: { rating: AgeRating; pin?: string; pinEnabled?: boolean }) {
+export function saveParentalSettings(settings: { rating?: AgeRating; pin?: string; pinEnabled?: boolean }) {
   try {
     const current = JSON.parse(localStorage.getItem(PARENTAL_KEY) || '{}');
     localStorage.setItem(PARENTAL_KEY, JSON.stringify({ ...current, ...settings }));

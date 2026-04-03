@@ -24,8 +24,8 @@ interface MovieDetailClientProps {
     title: string;
     tagline?: string;
     overview: string;
-    backdrop_path: string;
-    poster_path: string;
+    backdrop_path: string | null;
+    poster_path: string | null;
     vote_average: number;
     release_date?: string;
     runtime: number;

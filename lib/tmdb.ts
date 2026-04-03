@@ -63,6 +63,8 @@ export interface MovieDetails extends Movie {
     twitter_id: string | null;
   };
   number_of_seasons?: number;
+  number_of_episodes?: number;
+  vote_count?: number;
   seasons?: {
     season_number: number;
     episode_count: number;
