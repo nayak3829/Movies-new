@@ -441,8 +441,8 @@ export function VideoPlayer({
       );
     }
 
-    // Dynamic timeout: 4s for servers with good history, 3s for unknown/bad servers
-    const timeout = hasGoodStats ? 4000 : 3000;
+    // Dynamic timeout: 7s for servers with good history, 5s for unknown/bad servers
+    const timeout = hasGoodStats ? 7000 : 5000;
     
     timeoutRef.current = setTimeout(() => {
       if (isLoading && isAutoFetching) {
@@ -462,8 +462,20 @@ export function VideoPlayer({
       clearTimeout(timeoutRef.current);
     }
     
-    const loadTime = loadStartTime ? Date.now() - loadStartTime : undefined;
+    const loadTime = loadStartTime ? Date.now() - loadStartTime : 9999;
     const currentId = currentServer?.id;
+
+    // If loaded in under 1800ms during auto-fetch, it's almost certainly an error page.
+    // Real video players (JS bundled) take 2-6 seconds to initialize. Error/redirect pages
+    // respond in under a second. Skip to next server automatically.
+    if (isAutoFetching && loadTime < 1800) {
+      if (currentId) {
+        setServerStatuses(prev => ({ ...prev, [currentId]: 'failed' }));
+        updateServerStats(currentId, false);
+      }
+      tryNextServer();
+      return;
+    }
     
     if (currentId) {
       setServerStatuses(prev => ({ ...prev, [currentId]: 'success' }));
@@ -478,7 +490,7 @@ export function VideoPlayer({
     saveWatchProgress(
       tmdbId, 
       type, 
-      10, // Start at 10% when video begins
+      10,
       undefined,
       type === 'tv' ? currentSeason : undefined,
       type === 'tv' ? currentEpisode : undefined
@@ -1153,197 +1165,194 @@ export function VideoPlayer({
         </div>
       </div>
 
-      {/* Netflix-style Bottom Controls Bar - Always show on mobile, conditionally on desktop */}
+      {/* Bottom Controls Bar */}
       <div 
         className={`absolute bottom-0 left-0 right-0 z-[35] transition-all duration-500 ${
           isMinimized ? 'hidden' : controlsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'
         }`}
       >
-        <div className="bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-6 pb-3 sm:pt-8 sm:pb-4 px-3 sm:px-6">
-          {/* Server Status Bar */}
+        <div className="bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-10 pb-3 sm:pb-4 px-3 sm:px-6 flex flex-col gap-2">
+
+          {/* Row 1: Server status — only while loading / auto-fetching */}
           {(isLoading || isAutoFetching) && (
-            <div className="flex items-center gap-2 mb-3 px-1">
-              <div className="relative w-5 h-5">
-                <div className="w-5 h-5 rounded-full border-2 border-red-600/30 border-t-red-600 animate-spin" />
-              </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 shrink-0 rounded-full border-2 border-red-600/30 border-t-red-600 animate-spin" />
               <div className="flex-1 min-w-0">
-                <p className="text-white/90 text-sm truncate">{statusMessage}</p>
+                <p className="text-white/90 text-xs truncate">{statusMessage}</p>
                 {isAutoFetching && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                      <div 
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="flex-1 h-0.5 bg-white/10 rounded-full overflow-hidden">
+                      <div
                         className="h-full bg-red-600 transition-all duration-300"
                         style={{ width: `${((currentServerIndex + 1) / servers.length) * 100}%` }}
                       />
                     </div>
-                    <span className="text-white/50 text-xs">{currentServerIndex + 1}/{servers.length}</span>
+                    <span className="text-white/40 text-[10px] shrink-0">{currentServerIndex + 1}/{servers.length}</span>
                   </div>
                 )}
               </div>
-              {!isAutoFetching && !isLoading && (
+              {isAutoFetching && (
                 <button
-                  onClick={handleRetryAutoFetch}
-                  className="px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white text-xs transition-colors flex items-center gap-1.5"
+                  onClick={tryNextServer}
+                  className="shrink-0 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white/70 text-[11px] flex items-center gap-1 transition-colors"
                 >
-                  <RefreshCw className="w-3 h-3" />
-                  Retry
+                  <SkipForward className="w-3 h-3" />
+                  Skip
                 </button>
               )}
             </div>
           )}
 
-          {/* Mobile-only Download & Sandbox Row */}
-          <div className="flex sm:hidden items-center gap-2 mb-2 px-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs border border-white/10 transition-all">
-                  <Download className="w-3.5 h-3.5" />
-                  Download
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-zinc-900/95 backdrop-blur-sm border-white/10 z-[60] min-w-[200px]">
-                <div className="px-3 py-1.5 text-[10px] text-white/40 font-semibold uppercase tracking-widest">Download</div>
-                <DropdownMenuSeparator className="bg-white/10" />
-                {type === 'movie' ? (
-                  <a href={`https://dl.vidsrc.vip/movie/${tmdbId}`} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer transition-colors">
-                    <Download className="w-3.5 h-3.5 text-green-400" />
-                    Download Movie
-                  </a>
-                ) : (
-                  <>
-                    {Array.from({ length: Math.min(totalSeasons, 5) }, (_, i) => i + 1).map(s => (
-                      <a key={s} href={`https://dl.vidsrc.vip/tv/${tmdbId}/${s}/1`} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer transition-colors">
-                        <Download className="w-3.5 h-3.5 text-green-400" />
-                        Season {s}
-                      </a>
-                    ))}
-                    <DropdownMenuSeparator className="bg-white/10" />
-                    <a href={`https://dl.vidsrc.vip/tv/${tmdbId}/${currentSeason}/${currentEpisode}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-green-400 hover:bg-white/10 cursor-pointer transition-colors font-medium">
-                      <Download className="w-3.5 h-3.5" />
-                      S{currentSeason}E{currentEpisode}
-                    </a>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <button
-              onClick={() => { setSandboxMode(prev => !prev); setIsLoading(true); setLoadStartTime(Date.now()); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all ${
-                sandboxMode ? 'bg-green-500/20 border-green-400/40 text-green-400' : 'bg-white/10 border-white/10 text-white hover:bg-white/20'
-              }`}
-            >
-              {sandboxMode ? <Shield className="w-3.5 h-3.5" /> : <ShieldOff className="w-3.5 h-3.5" />}
-              Sandbox {sandboxMode ? 'On' : 'Off'}
-            </button>
-          </div>
+          {/* Row 2: Main controls — always visible */}
+          <div className="flex items-center justify-between gap-2">
 
-          {/* Controls Row - Compact for mobile */}
-          <div className="flex items-center justify-between gap-2 sm:gap-4">
-            {/* Left: Episode Navigation */}
-            <div className="flex items-center gap-1 sm:gap-2">
+            {/* Left side */}
+            <div className="flex items-center gap-1.5">
+              {/* TV: Prev episode */}
               {type === 'tv' && (
-                <>
-                  <button
-                    onClick={handlePrevEpisode}
-                    disabled={!hasPrevEpisode}
-                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all"
-                  >
-                    <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                  </button>
-                  <button
-                    onClick={handleNextEpisode}
-                    disabled={!hasNextEpisode}
-                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all"
-                  >
-                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                  </button>
-                </>
+                <button
+                  onClick={handlePrevEpisode}
+                  disabled={!hasPrevEpisode}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                >
+                  <ChevronLeft className="w-4 h-4 text-white" />
+                </button>
               )}
-            </div>
 
-            {/* Center: Season/Episode Selectors */}
-            {type === 'tv' && (
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                {/* Season Selector */}
-                {totalSeasons > 0 && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="px-2 sm:px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-1">
-                        <span className="text-white text-xs sm:text-sm font-medium">S{currentSeason}</span>
-                        <ChevronDown className="w-3 h-3 text-white/70" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="center" className="max-h-64 overflow-y-auto bg-zinc-900/95 backdrop-blur-sm border-white/10">
-                      {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((s) => (
-                        <DropdownMenuItem
-                          key={s}
-                          onClick={() => {
-                            setIsLoading(true);
-                            setLoadStartTime(Date.now());
-                            setCurrentSeason(s);
-                            setCurrentEpisode(1);
-                          }}
-                          className={`${currentSeason === s ? 'bg-red-600/20 text-red-500' : 'text-white'}`}
-                        >
-                          Season {s}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-
-                {/* Episode Selector */}
+              {/* TV: Season selector */}
+              {type === 'tv' && totalSeasons > 0 && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="px-2 sm:px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-1">
-                      <span className="text-white text-xs sm:text-sm font-medium">E{currentEpisode}</span>
-                      <ChevronDown className="w-3 h-3 text-white/70" />
+                    <button className="px-2 py-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-1">
+                      <span className="text-white text-xs font-medium">S{currentSeason}</span>
+                      <ChevronDown className="w-3 h-3 text-white/60" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center" className="max-h-64 overflow-y-auto bg-zinc-900/95 backdrop-blur-sm border-white/10">
+                  <DropdownMenuContent align="start" className="max-h-56 overflow-y-auto bg-zinc-900/95 backdrop-blur-sm border-white/10">
+                    {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((s) => (
+                      <DropdownMenuItem
+                        key={s}
+                        onClick={() => { setIsLoading(true); setLoadStartTime(Date.now()); setCurrentSeason(s); setCurrentEpisode(1); }}
+                        className={currentSeason === s ? 'bg-red-600/20 text-red-500' : 'text-white'}
+                      >
+                        Season {s}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
+              {/* TV: Episode selector */}
+              {type === 'tv' && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="px-2 py-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-1">
+                      <span className="text-white text-xs font-medium">E{currentEpisode}</span>
+                      <ChevronDown className="w-3 h-3 text-white/60" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="max-h-56 overflow-y-auto bg-zinc-900/95 backdrop-blur-sm border-white/10">
                     {Array.from({ length: totalEpisodes }, (_, i) => i + 1).map((e) => (
                       <DropdownMenuItem
                         key={e}
-                        onClick={() => {
-                          setIsLoading(true);
-                          setLoadStartTime(Date.now());
-                          setCurrentEpisode(e);
-                        }}
-                        className={`${currentEpisode === e ? 'bg-red-600/20 text-red-500' : 'text-white'}`}
+                        onClick={() => { setIsLoading(true); setLoadStartTime(Date.now()); setCurrentEpisode(e); }}
+                        className={currentEpisode === e ? 'bg-red-600/20 text-red-500' : 'text-white'}
                       >
                         Episode {e}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
-            )}
+              )}
 
-            {/* Right: Autoplay toggle + Next Episode Button */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              {/* Autoplay Toggle */}
+              {/* TV: Next episode */}
+              {type === 'tv' && (
+                <button
+                  onClick={handleNextEpisode}
+                  disabled={!hasNextEpisode}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all"
+                >
+                  <ChevronRight className="w-4 h-4 text-white" />
+                </button>
+              )}
+            </div>
+
+            {/* Right side */}
+            <div className="flex items-center gap-1.5">
+              {/* "Not playing?" — compact button, only when more servers available */}
+              {!isLoading && !isAutoFetching && currentServerIndex < servers.length - 1 && (
+                <button
+                  onClick={() => {
+                    const nextIdx = currentServerIndex + 1;
+                    if (nextIdx < servers.length) {
+                      setCurrentServerIndex(nextIdx);
+                      setIsLoading(true);
+                      setIsAutoFetching(false);
+                      setLoadStartTime(Date.now());
+                    }
+                  }}
+                  className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/8 hover:bg-white/15 border border-white/10 text-white/50 hover:text-white/80 text-[10px] transition-all"
+                >
+                  <SkipForward className="w-2.5 h-2.5" />
+                  Next Server
+                </button>
+              )}
+
+              {/* Download button */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all" title="Download">
+                    <Download className="w-3.5 h-3.5 text-white" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-zinc-900/95 backdrop-blur-sm border-white/10 z-[60] min-w-[180px]">
+                  <div className="px-3 py-1.5 text-[10px] text-white/40 font-semibold uppercase tracking-widest">Download</div>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  {type === 'movie' ? (
+                    <a href={`https://dl.vidsrc.vip/movie/${tmdbId}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer transition-colors">
+                      <Download className="w-3.5 h-3.5 text-green-400" />
+                      Download Movie
+                    </a>
+                  ) : (
+                    <>
+                      {Array.from({ length: Math.min(totalSeasons, 5) }, (_, i) => i + 1).map(s => (
+                        <a key={s} href={`https://dl.vidsrc.vip/tv/${tmdbId}/${s}/1`} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer transition-colors">
+                          <Download className="w-3.5 h-3.5 text-green-400" />
+                          Season {s}
+                        </a>
+                      ))}
+                      <DropdownMenuSeparator className="bg-white/10" />
+                      <a href={`https://dl.vidsrc.vip/tv/${tmdbId}/${currentSeason}/${currentEpisode}`} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-green-400 hover:bg-white/10 cursor-pointer transition-colors font-medium">
+                        <Download className="w-3.5 h-3.5" />
+                        S{currentSeason}E{currentEpisode}
+                      </a>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* TV: Autoplay toggle (desktop only) */}
               {type === 'tv' && (
                 <button
                   onClick={() => setAutoplayEnabled(prev => !prev)}
-                  className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-all ${
-                    autoplayEnabled
-                      ? 'bg-white/15 text-white border-white/25'
-                      : 'bg-transparent text-white/35 border-white/10'
+                  className={`hidden sm:flex items-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-medium border transition-all ${
+                    autoplayEnabled ? 'bg-white/15 text-white border-white/25' : 'bg-transparent text-white/35 border-white/10'
                   }`}
                   title="Toggle Autoplay"
                 >
                   <SkipForward className="w-3 h-3" />
-                  <span>Autoplay</span>
+                  Autoplay
                 </button>
               )}
-              {/* Next Episode Button */}
+
+              {/* TV: Next episode button */}
               {type === 'tv' && hasNextEpisode && (
                 <button
                   onClick={handleNextEpisodeClick}
-                  className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-md bg-white text-black text-xs sm:text-sm font-semibold hover:bg-white/90 transition-colors"
+                  className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-md bg-white text-black text-xs font-semibold hover:bg-white/90 transition-colors"
                 >
                   <span className="hidden sm:inline">Next</span>
                   <SkipForward className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -1351,6 +1360,7 @@ export function VideoPlayer({
               )}
             </div>
           </div>
+
         </div>
       </div>
 
@@ -1501,7 +1511,6 @@ export function VideoPlayer({
             allowFullScreen
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; accelerometer; gyroscope; clipboard-write"
             referrerPolicy="no-referrer-when-downgrade"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-pointer-lock allow-popups-to-escape-sandbox"
             onLoad={() => {
               handleIframeLoad();
             }}

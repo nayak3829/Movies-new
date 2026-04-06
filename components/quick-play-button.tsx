@@ -24,7 +24,7 @@ export function QuickPlayButton({
   const [isHovered, setIsHovered] = useState(false);
 
   const title = movie.title || movie.name || 'Unknown';
-  const mediaType = movie.media_type || (movie.first_air_date ? 'tv' : 'movie');
+  const mediaType = (movie.media_type || (movie.first_air_date ? 'tv' : 'movie')) as 'movie' | 'tv';
 
   const handlePlay = (e: React.MouseEvent) => {
     e.preventDefault();

@@ -26,8 +26,8 @@ interface TVDetailClientProps {
     title?: string;
     tagline?: string;
     overview: string;
-    backdrop_path: string;
-    poster_path: string;
+    backdrop_path: string | null;
+    poster_path: string | null;
     vote_average: number;
     first_air_date?: string;
     number_of_seasons?: number;

@@ -17,13 +17,7 @@ export function VoiceSearch({ onResult, onListening, className }: VoiceSearchPro
 
   useEffect(() => {
     // Check if speech recognition is supported
-    const SpeechRecognition = (window as Window & typeof globalThis & { 
-      webkitSpeechRecognition?: typeof window.SpeechRecognition;
-      SpeechRecognition?: typeof window.SpeechRecognition;
-    }).webkitSpeechRecognition || (window as Window & typeof globalThis & { 
-      SpeechRecognition?: typeof window.SpeechRecognition;
-    }).SpeechRecognition;
-    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     setIsSupported(!!SpeechRecognition);
   }, []);
 
@@ -37,11 +31,7 @@ export function VoiceSearch({ onResult, onListening, className }: VoiceSearchPro
     setIsListening(true);
     onListening?.(true);
 
-    const SpeechRecognition = (window as Window & typeof globalThis & { 
-      webkitSpeechRecognition?: typeof window.SpeechRecognition;
-    }).webkitSpeechRecognition || (window as Window & typeof globalThis & { 
-      SpeechRecognition?: typeof window.SpeechRecognition;
-    }).SpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) return;
 
@@ -143,11 +133,7 @@ export function VoiceSearchLarge({
   const [transcript, setTranscript] = useState('');
 
   useEffect(() => {
-    const SpeechRecognition = (window as Window & typeof globalThis & { 
-      webkitSpeechRecognition?: typeof window.SpeechRecognition;
-    }).webkitSpeechRecognition || (window as Window & typeof globalThis & { 
-      SpeechRecognition?: typeof window.SpeechRecognition;
-    }).SpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       onClose();

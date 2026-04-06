@@ -104,7 +104,7 @@ function MovieRowComponent({ title, movies, showRank = false }: MovieRowProps) {
             key={movie.id} 
             className="flex-shrink-0 w-[120px] sm:w-[140px] md:w-[160px] lg:w-[180px] xl:w-[200px] snap-start"
           >
-            <MovieCard movie={movie} index={showRank ? index : undefined} />
+            <MovieCard movie={movie} index={showRank ? index : undefined} priority={index < 4} />
           </div>
         ))}
       </div>
