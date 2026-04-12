@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Search, Loader2, Film, Tv, Star, TrendingUp, Hash } from 'lucide-react';
 import { getImageUrl } from '@/lib/tmdb';
@@ -28,12 +27,12 @@ function ResultCard({ item }: { item: SearchResult }) {
     <Link href={`/${item.media_type}/${item.id}`} className="group">
       <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-white/5 mb-2">
         {item.poster_path ? (
-          <Image
-            src={getImageUrl(item.poster_path, 'w500')}
+          <img
+            src={getImageUrl(item.poster_path, 'w342')}
             alt={title}
-            fill
-            sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 16vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-white/20">

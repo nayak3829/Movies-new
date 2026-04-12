@@ -5,7 +5,6 @@ import { Navbar } from '@/components/navbar';
 import { Plus, Trash2, Play, Star, Bookmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import Image from 'next/image';
 import { getImageUrl } from '@/lib/tmdb';
 
 interface SavedItem {
@@ -108,12 +107,12 @@ export default function MyListPage() {
                   <div key={item.id} className="group relative">
                     <Link href={`/${item.media_type}/${item.id}`}>
                       <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-secondary">
-                        <Image
-                          src={getImageUrl(item.poster_path, 'w500')}
+                        <img
+                          src={getImageUrl(item.poster_path, 'w342')}
                           alt={title}
-                          fill
-                          sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 16vw"
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                          decoding="async"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         

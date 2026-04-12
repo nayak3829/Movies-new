@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Navbar } from '@/components/navbar';
 import { getPersonDetails, getImageUrl } from '@/lib/tmdb';
@@ -68,12 +67,12 @@ export default async function PersonPage({ params }: PersonPageProps) {
           <div className="flex-shrink-0">
             <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-2xl overflow-hidden shadow-2xl border border-white/10 mx-auto md:mx-0">
               {person.profile_path ? (
-                <Image
+                <img
                   src={getImageUrl(person.profile_path, 'w500')}
                   alt={person.name}
-                  fill
-                  className="object-cover"
-                  priority
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="eager"
+                  decoding="async"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted text-6xl font-bold text-muted-foreground">
@@ -151,11 +150,12 @@ export default async function PersonPage({ params }: PersonPageProps) {
                   className="group"
                 >
                   <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-muted border border-white/10 group-hover:border-white/30 transition-all shadow-md">
-                    <Image
-                      src={getImageUrl(movie.poster_path, 'w200')}
+                    <img
+                      src={getImageUrl(movie.poster_path, 'w185')}
                       alt={movie.title || ''}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -187,11 +187,12 @@ export default async function PersonPage({ params }: PersonPageProps) {
                   className="group"
                 >
                   <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-muted border border-white/10 group-hover:border-white/30 transition-all shadow-md">
-                    <Image
-                      src={getImageUrl(show.poster_path, 'w200')}
+                    <img
+                      src={getImageUrl(show.poster_path, 'w185')}
                       alt={show.name || show.title || ''}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">

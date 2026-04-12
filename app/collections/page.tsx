@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 
 export const revalidate = 86400;
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { Navbar } from '@/components/navbar';
 import { getCollection, getImageUrl } from '@/lib/tmdb';
@@ -69,11 +68,12 @@ export default async function CollectionsPage() {
                 <Link key={col.id} href={`/collection/${col.id}`} className="group">
                   <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-muted border border-white/10 group-hover:border-white/30 transition-all shadow-lg">
                     {col.poster_path ? (
-                      <Image
-                        src={getImageUrl(col.poster_path, 'w500')}
+                      <img
+                        src={getImageUrl(col.poster_path, 'w342')}
                         alt={col.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-muted to-muted/50 gap-2">

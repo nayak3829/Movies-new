@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
 import { getCollection, getImageUrl } from '@/lib/tmdb';
 import { MovieRow } from '@/components/movie-row';
@@ -36,12 +35,13 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
       <div className="relative h-[40vh] md:h-[55vh]">
         {collection.backdrop_path && (
           <div className="absolute inset-0">
-            <Image
+            <img
               src={getImageUrl(collection.backdrop_path, 'original')}
               alt={collection.name}
-              fill
-              className="object-cover object-center"
-              priority
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />

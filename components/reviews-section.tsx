@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Star, MessageSquare } from 'lucide-react';
 import { getImageUrl, type Review } from '@/lib/tmdb';
 
@@ -49,12 +48,12 @@ export function ReviewsSection({ reviews }: ReviewsSectionProps) {
                 {/* Avatar */}
                 <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary/80 to-red-800 flex-shrink-0 border border-white/10">
                   {avatarUrl ? (
-                    <Image
+                    <img
                       src={avatarUrl}
                       alt={review.author}
-                      fill
-                      className="object-cover"
-                      onError={() => {}}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-white font-bold text-sm">

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Play, X, Clock, History, Trash2, Film, Tv } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -152,12 +151,12 @@ export function WatchHistoryClient() {
                 <Link href={`/${item.media_type}/${item.id}`}>
                   <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-muted">
                     {item.poster_path ? (
-                      <Image
-                        src={getImageUrl(item.poster_path, 'w300')}
+                      <img
+                        src={getImageUrl(item.poster_path, 'w342')}
                         alt={item.title}
-                        fill
-                        sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 16vw"
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <div className="w-full h-full bg-muted flex items-center justify-center">

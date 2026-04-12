@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Filter, ChevronDown } from 'lucide-react';
 import { Movie } from '@/lib/tmdb';
@@ -195,12 +194,12 @@ export function ContentFilter() {
                   >
                     <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-zinc-800 border border-white/5 group-hover:border-white/20 transition-all group-hover:scale-105 shadow-md">
                       {item.poster_path ? (
-                        <Image
-                          src={`https://image.tmdb.org/t/p/w300${item.poster_path}`}
+                        <img
+                          src={`https://image.tmdb.org/t/p/w342${item.poster_path}`}
                           alt={item.title || item.name || ''}
-                          fill
-                          sizes="(max-width: 640px) 33vw, (max-width: 1024px) 20vw, 12vw"
-                          className="object-cover"
+                          className="absolute inset-0 w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-white/20 text-xs text-center p-2">

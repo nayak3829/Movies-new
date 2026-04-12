@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { ChevronDown, Star, Clock, Calendar, Play, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getImageUrl, type Episode } from '@/lib/tmdb';
 import { cn } from '@/lib/utils';
@@ -107,11 +106,12 @@ export function EpisodeGuide({ tvId, seasons, onPlayEpisode }: EpisodeGuideProps
         <div className="mb-6 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
           <div className="relative aspect-video w-full bg-black">
             {nowPlaying.still_path ? (
-              <Image
+              <img
                 src={getImageUrl(nowPlaying.still_path, 'original')}
                 alt={nowPlaying.name}
-                fill
-                className="object-cover opacity-70"
+                className="absolute inset-0 w-full h-full object-cover opacity-70"
+                loading="eager"
+                decoding="async"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-black/50">
@@ -222,11 +222,12 @@ export function EpisodeGuide({ tvId, seasons, onPlayEpisode }: EpisodeGuideProps
                 {/* Thumbnail */}
                 <div className="relative w-36 md:w-48 h-20 md:h-27 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-white/10 group-hover:border-white/30 transition-all">
                   {ep.still_path ? (
-                    <Image
+                    <img
                       src={getImageUrl(ep.still_path, 'w300')}
                       alt={ep.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-muted">

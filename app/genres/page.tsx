@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Navbar } from '@/components/navbar';
 import { Clapperboard, Tv2 } from 'lucide-react';
@@ -58,13 +57,12 @@ function GenreCard({ genre, priority = false }: { genre: typeof MOVIE_GENRES[0] 
 
   return (
     <Link href={href} className="group relative overflow-hidden rounded-xl aspect-video border border-white/10 group-hover:border-white/30 transition-all shadow-lg block">
-      <Image
+      <img
         src={`https://image.tmdb.org/t/p/w500${genre.backdrop}`}
         alt={genre.name}
-        fill
-        priority={priority}
-        sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 18vw"
-        className="object-cover transition-transform duration-500 group-hover:scale-110"
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10 group-hover:from-black/70 transition-all" />
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 p-3 text-center">

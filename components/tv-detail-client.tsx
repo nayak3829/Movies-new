@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Play, Plus, Check, Share2, Star, Film, ExternalLink, ArrowLeft, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -149,13 +148,13 @@ export function TVDetailClient({ show }: TVDetailClientProps) {
       {/* Hero Section */}
       <div className="relative h-[60vh] sm:h-[70vh] md:h-[80vh]">
         <div className="absolute inset-0">
-          <Image
+          <img
             src={getImageUrl(show.backdrop_path, 'original')}
             alt={title}
-            fill
-            sizes="100vw"
-            className="object-cover object-top sm:object-center"
-            priority
+            className="absolute inset-0 w-full h-full object-cover object-top sm:object-center"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/20 md:via-background/60 md:to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
@@ -166,12 +165,12 @@ export function TVDetailClient({ show }: TVDetailClientProps) {
           <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start w-full">
             {/* Poster - Hidden on mobile */}
             <div className="hidden md:block relative w-48 lg:w-64 aspect-[2/3] rounded-lg overflow-hidden shadow-2xl flex-shrink-0 border border-white/10">
-              <Image
+              <img
                 src={getImageUrl(show.poster_path, 'w500')}
                 alt={title}
-                fill
-                sizes="(max-width: 1024px) 192px, 256px"
-                className="object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="eager"
+                decoding="async"
               />
             </div>
 
@@ -315,12 +314,12 @@ export function TVDetailClient({ show }: TVDetailClientProps) {
               <Link key={actor.id} href={`/person/${actor.id}`} className="flex-shrink-0 w-20 sm:w-24 md:w-32 group">
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full overflow-hidden mb-2 bg-muted border-2 border-white/10 group-hover:border-white/40 transition-all">
                   {actor.profile_path ? (
-                    <Image
-                      src={getImageUrl(actor.profile_path, 'w200')}
+                    <img
+                      src={getImageUrl(actor.profile_path, 'w185')}
                       alt={actor.name}
-                      fill
-                      sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, 128px"
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-xl md:text-3xl text-muted-foreground bg-gradient-to-br from-muted to-muted/50">
