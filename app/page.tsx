@@ -1,39 +1,21 @@
-import { Suspense } from 'react';
-
-export const revalidate = 14400;
-
 import { Navbar } from '@/components/navbar';
 import { HeroBanner } from '@/components/hero-banner';
 import { MovieRow } from '@/components/movie-row';
 import { ContinueWatching } from '@/components/continue-watching';
-import { BelowFoldRows } from '@/components/below-fold-rows';
-import { HomeFeedRows } from '@/components/home-feed-rows';
 import { ContentFilter } from '@/components/content-filter';
-import { getTrending, MovieResponse } from '@/lib/tmdb';
+import { ComingSoon } from '@/components/coming-soon';
+import { RecommendedRow } from '@/components/recommended-row';
+import { getHomePageDataSafe } from '@/lib/tmdb';
 
-const emptyResponse: MovieResponse = { page: 1, results: [], total_pages: 0, total_results: 0 };
-
-async function fetchWithFallback<T>(fetcher: () => Promise<T>, fallback: T): Promise<T> {
-  try {
-    return await fetcher();
-  } catch {
-    return fallback;
-  }
-}
-
-const RowSkeleton = () => (
-  <div className="space-y-0 md:space-y-1">
-    {Array.from({ length: 4 }).map((_, i) => (
-      <div key={i} className="h-48 sm:h-56 md:h-64 animate-pulse bg-muted/10 rounded mx-4 md:mx-12 mb-2" />
-    ))}
-  </div>
-);
+// Static generation with ISR - regenerate every 4 hours
+export const revalidate = 14400;
 
 export default async function HomePage() {
-  const trending = await fetchWithFallback(() => getTrending('week'), emptyResponse);
+  // Single cached API call for ALL home page data
+  const data = await getHomePageDataSafe();
 
   const hasApiKey = process.env.TMDB_API_KEY;
-  const hasContent = trending.results.length > 0;
+  const hasContent = data.trending.results.length > 0;
 
   return (
     <main className="min-h-screen bg-background" suppressHydrationWarning>
@@ -58,24 +40,33 @@ export default async function HomePage() {
         </div>
       ) : (
         <>
-          <HeroBanner movies={trending.results.slice(0, 5)} />
+          <HeroBanner movies={data.trending.results.slice(0, 5)} />
           
           <div className="-mt-16 sm:-mt-24 md:-mt-32 relative z-10 space-y-0 md:space-y-1 pb-24 md:pb-8">
             <ContinueWatching />
             <ContentFilter />
 
-            {/* Trending row — data already available, renders instantly */}
-            <MovieRow title="Trending Now" movies={trending.results} showRank />
-
-            {/* Popular, Now Playing, Genres — streamed in after hero */}
-            <Suspense fallback={<RowSkeleton />}>
-              <HomeFeedRows />
-            </Suspense>
-
-            {/* Below-fold rows — streamed in last */}
-            <Suspense fallback={<RowSkeleton />}>
-              <BelowFoldRows />
-            </Suspense>
+            {/* All rows render instantly - data is pre-fetched in single cached call */}
+            <MovieRow title="Trending Now" movies={data.trending.results} showRank />
+            <MovieRow title="Popular Movies" movies={data.popular.results} />
+            <MovieRow title="Now Playing" movies={data.nowPlaying.results} />
+            <MovieRow title="Action Movies" movies={data.genres.action.results} />
+            <MovieRow title="Comedy" movies={data.genres.comedy.results} />
+            <MovieRow title="Horror" movies={data.genres.horror.results} />
+            <MovieRow title="Popular TV Shows" movies={data.popularTV.results} />
+            <ComingSoon movies={data.upcoming.results} title="Coming Soon" />
+            
+            {/* Below fold content */}
+            <MovieRow title="Sci-Fi" movies={data.genres.sciFi.results} />
+            <MovieRow title="Thriller" movies={data.genres.thriller.results} />
+            <MovieRow title="Top Rated Movies" movies={data.topRated.results} />
+            <MovieRow title="Romance" movies={data.genres.romance.results} />
+            <MovieRow title="Crime TV" movies={data.tvGenres.crime.results} />
+            <MovieRow title="Animation" movies={data.genres.animation.results} />
+            <MovieRow title="Drama TV" movies={data.tvGenres.drama.results} />
+            <MovieRow title="Top Rated TV Shows" movies={data.topRatedTV.results} />
+            <MovieRow title="Documentaries" movies={data.genres.documentary.results} />
+            <RecommendedRow />
           </div>
         </>
       )}

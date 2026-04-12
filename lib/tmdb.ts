@@ -316,3 +316,121 @@ export const TV_GENRES: Genre[] = [
   { id: 10768, name: 'War & Politics' },
   { id: 37, name: 'Western' },
 ];
+
+// Batched home page data - single cached call instead of 17 separate calls
+export interface HomePageData {
+  trending: MovieResponse;
+  popular: MovieResponse;
+  nowPlaying: MovieResponse;
+  popularTV: MovieResponse;
+  topRated: MovieResponse;
+  topRatedTV: MovieResponse;
+  upcoming: MovieResponse;
+  genres: {
+    action: MovieResponse;
+    comedy: MovieResponse;
+    horror: MovieResponse;
+    sciFi: MovieResponse;
+    romance: MovieResponse;
+    thriller: MovieResponse;
+    animation: MovieResponse;
+    documentary: MovieResponse;
+  };
+  tvGenres: {
+    crime: MovieResponse;
+    drama: MovieResponse;
+  };
+}
+
+const emptyResponse: MovieResponse = { page: 1, results: [], total_pages: 0, total_results: 0 };
+
+// Fetch all home page data in parallel and cache as single unit
+async function _getHomePageData(): Promise<HomePageData> {
+  const [
+    trending,
+    popular,
+    nowPlaying,
+    popularTV,
+    topRated,
+    topRatedTV,
+    upcoming,
+    action,
+    comedy,
+    horror,
+    sciFi,
+    romance,
+    thriller,
+    animation,
+    documentary,
+    crimeTV,
+    dramaTV,
+  ] = await Promise.all([
+    _fetchFromTMDB<MovieResponse>('/trending/all/week'),
+    _fetchFromTMDB<MovieResponse>('/movie/popular'),
+    _fetchFromTMDB<MovieResponse>('/movie/now_playing'),
+    _fetchFromTMDB<MovieResponse>('/tv/popular'),
+    _fetchFromTMDB<MovieResponse>('/movie/top_rated'),
+    _fetchFromTMDB<MovieResponse>('/tv/top_rated'),
+    _fetchFromTMDB<MovieResponse>('/movie/upcoming'),
+    _fetchFromTMDB<MovieResponse>('/discover/movie', { with_genres: '28' }),
+    _fetchFromTMDB<MovieResponse>('/discover/movie', { with_genres: '35' }),
+    _fetchFromTMDB<MovieResponse>('/discover/movie', { with_genres: '27' }),
+    _fetchFromTMDB<MovieResponse>('/discover/movie', { with_genres: '878' }),
+    _fetchFromTMDB<MovieResponse>('/discover/movie', { with_genres: '10749' }),
+    _fetchFromTMDB<MovieResponse>('/discover/movie', { with_genres: '53' }),
+    _fetchFromTMDB<MovieResponse>('/discover/movie', { with_genres: '16' }),
+    _fetchFromTMDB<MovieResponse>('/discover/movie', { with_genres: '99' }),
+    _fetchFromTMDB<MovieResponse>('/discover/tv', { with_genres: '80' }),
+    _fetchFromTMDB<MovieResponse>('/discover/tv', { with_genres: '18' }),
+  ]);
+
+  return {
+    trending,
+    popular,
+    nowPlaying,
+    popularTV,
+    topRated,
+    topRatedTV,
+    upcoming,
+    genres: { action, comedy, horror, sciFi, romance, thriller, animation, documentary },
+    tvGenres: { crime: crimeTV, drama: dramaTV },
+  };
+}
+
+// Single cached call for entire home page - 4 hours cache
+export const getHomePageData = unstable_cache(
+  _getHomePageData,
+  ['home-page-data'],
+  {
+    revalidate: CACHE_DURATION,
+    tags: ['tmdb', 'home'],
+  }
+);
+
+// Safe version with fallback
+export async function getHomePageDataSafe(): Promise<HomePageData> {
+  try {
+    return await getHomePageData();
+  } catch {
+    return {
+      trending: emptyResponse,
+      popular: emptyResponse,
+      nowPlaying: emptyResponse,
+      popularTV: emptyResponse,
+      topRated: emptyResponse,
+      topRatedTV: emptyResponse,
+      upcoming: emptyResponse,
+      genres: {
+        action: emptyResponse,
+        comedy: emptyResponse,
+        horror: emptyResponse,
+        sciFi: emptyResponse,
+        romance: emptyResponse,
+        thriller: emptyResponse,
+        animation: emptyResponse,
+        documentary: emptyResponse,
+      },
+      tvGenres: { crime: emptyResponse, drama: emptyResponse },
+    };
+  }
+}
